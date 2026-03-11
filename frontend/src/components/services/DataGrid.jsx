@@ -1,5 +1,134 @@
-import React, { useMemo } from 'react';
-import { ChevronRight, ShoppingCart, PlusCircle, FileSpreadsheet } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { ChevronRight, ShoppingCart, PlusCircle, FileSpreadsheet, Minus, Plus } from 'lucide-react';
+
+const ProductRow = ({ product }) => {
+  const [quantity, setQuantity] = useState(1);
+
+  const handleIncrement = () => setQuantity(prev => prev + 1);
+  const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+
+  return (
+    <div className="grid grid-cols-12 gap-6 px-8 py-6 items-center hover:bg-slate-50/50 transition-all group">
+      
+      {/* Col 1: Gamma & Branding */}
+      <div className="col-span-1 flex flex-col items-center gap-3">
+        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-sm ${
+          product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'
+        }`}>
+          {product.g}
+        </span>
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100 uppercase tracking-tighter">
+            {product.clave}
+          </span>
+        </div>
+      </div>
+
+      {/* Col 2: Info & Status - Optimized Layout */}
+      <div className="col-span-3 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-[15px] font-black text-slate-800 leading-snug group-hover:text-brand-red transition-colors">
+            {product.description}
+          </h3>
+          <button className="shrink-0 p-2 bg-slate-100 text-slate-400 rounded-xl hover:bg-brand-blue hover:text-white transition-all shadow-sm">
+            <FileSpreadsheet className="w-4 h-4" />
+          </button>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[11px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 uppercase italic tracking-wide">
+            {product.statusDetail}
+          </span>
+          <div className="h-3 w-px bg-slate-200"></div>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            MSPN: <span className="text-slate-900 font-black">{product.mspn}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* Col 3: Branch Expansion - Increased Visibility */}
+      <div className="col-span-4 px-2">
+        <div className="grid grid-cols-5 gap-1.5">
+          {product.branches.map((br) => (
+            <div key={br.code} className={`flex flex-col items-center justify-center p-1.5 rounded-lg border min-w-[38px] transition-all ${
+              br.stock > 0 
+              ? 'bg-white border-slate-200 shadow-sm' 
+              : 'bg-slate-50/30 border-transparent opacity-20'
+            }`}>
+              <span className="text-[8px] font-black text-slate-500 mb-0.5 leading-none uppercase">{br.code}</span>
+              <span className={`text-[11px] font-black leading-none ${br.stock > 0 ? 'text-brand-blue' : 'text-slate-400'}`}>
+                {br.stock}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex items-center justify-between px-1">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Red de Plazas</p>
+          <p className="text-[12px] font-black text-slate-800 leading-none">
+            DISPONIBLE: <span className="text-brand-red ml-1">{product.stock}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Col 4: Complex Commercial Details & Quantity Control */}
+      <div className="col-span-4 flex items-center gap-6">
+        <div className="flex-1 space-y-3 text-right">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+            <div>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">P. Lista</p>
+              <p className="text-[14px] font-black text-slate-700">${product.priceList.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Desc / Promo</p>
+              <p className="text-[14px] font-black text-brand-red">{product.discountPercent}% <span className="text-slate-300 font-medium">/</span> {product.promotion}%</p>
+            </div>
+          </div>
+          
+          <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden group/piso">
+            <div className="absolute top-0 right-0 w-12 h-12 bg-white/5 rounded-full blur-2xl -mr-4 -mt-4"></div>
+            <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">
+              <span>Detalle de Piso</span>
+              <span>IVA INC.</span>
+            </div>
+            <div className="flex justify-between items-baseline">
+              <span className="text-[16px] font-black text-green-400 drop-shadow-sm">${product.piso.neto.toLocaleString()}</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Precio Neto</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quantity Selector & Action */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+            <button 
+              onClick={handleDecrement}
+              className="p-1.5 hover:bg-white hover:text-brand-red rounded-xl transition-all active:scale-90 text-slate-400"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <input 
+              type="number" 
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-10 text-center bg-transparent border-none text-xs font-black text-slate-800 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:ring-0"
+            />
+            <button 
+              onClick={handleIncrement}
+              className="p-1.5 hover:bg-white hover:text-brand-blue rounded-xl transition-all active:scale-90 text-slate-400"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          
+          <button className="w-full flex items-center justify-center p-4 bg-slate-900 text-white rounded-2xl hover:bg-brand-red hover:shadow-2xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-slate-800">
+            <PlusCircle className="w-5 h-5 group-hover/btn:rotate-90 transition-transform" />
+          </button>
+        </div>
+      </div>
+
+    </div>
+  );
+};
 
 const DataGrid = () => {
   // Enriched Mock data with 10 products
@@ -115,96 +244,7 @@ const DataGrid = () => {
       {/* Table Body - Traditional Card Style without Internal Scroll */}
       <div className="bg-white border-x border-b border-slate-100 rounded-b-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden divide-y divide-slate-100/50">
         {products.map((product) => (
-          <div key={product.id} className="grid grid-cols-12 gap-6 px-8 py-6 items-center hover:bg-slate-50/50 transition-all group">
-            
-            {/* Col 1: Gamma & Clave */}
-            <div className="col-span-1 flex flex-col items-center gap-2">
-              <span className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] border ${
-                product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'
-              }`}>
-                {product.g}
-              </span>
-              <span className="text-[9px] font-black text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                {product.clave}
-              </span>
-            </div>
-
-            {/* Col 2: Info & Status */}
-            <div className="col-span-3 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-black text-slate-800 leading-tight group-hover:text-brand-red transition-colors">
-                  {product.description}
-                </h3>
-                <button className="shrink-0 p-1.5 bg-slate-100 text-slate-400 rounded-lg hover:bg-brand-blue hover:text-white transition-all shadow-sm">
-                  <FileSpreadsheet className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100 uppercase italic">
-                  {product.statusDetail}
-                </span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase">MSPN: {product.mspn}</span>
-              </div>
-            </div>
-
-            {/* Col 3: Branch Expansion */}
-            <div className="col-span-4 px-2">
-              <div className="grid grid-cols-6 gap-1">
-                {product.branches.map((br) => (
-                  <div key={br.code} className={`flex flex-col items-center justify-center p-1 rounded-md border min-w-[32px] transition-all ${
-                    br.stock > 0 
-                    ? 'bg-white border-slate-200 shadow-xs' 
-                    : 'bg-slate-50/30 border-transparent opacity-20'
-                  }`}>
-                    <span className="text-[6px] font-black text-slate-500 mb-0.5 leading-none">{br.code}</span>
-                    <span className={`text-[8px] font-bold leading-none ${br.stock > 0 ? 'text-brand-blue' : 'text-slate-400'}`}>
-                      {br.stock}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 flex items-center justify-between px-1">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Red de Plazas</p>
-                <p className="text-[10px] font-black text-slate-800 leading-none">
-                  Total: <span className="text-brand-red ml-1">{product.stock}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Col 4: Complex Commercial Details & Final Action */}
-            <div className="col-span-4 flex items-center gap-4">
-              <div className="flex-1 space-y-2 text-right">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                  <div>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase">P. Lista</p>
-                    <p className="text-[11px] font-black text-slate-600">${product.priceList.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase">Desc / Promo</p>
-                    <p className="text-[11px] font-black text-brand-red">{product.discountPercent}% / {product.promotion}%</p>
-                  </div>
-                </div>
-                
-                <div className="bg-slate-900 text-white p-2 rounded-xl shadow-lg border border-slate-800 space-y-1">
-                  <div className="flex justify-between items-center text-[7px] font-black uppercase tracking-widest opacity-60">
-                    <span>Detalle de Piso</span>
-                    <span>IVA INC.</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] font-bold text-green-400">${product.piso.neto.toLocaleString()}</span>
-                    <span className="text-[7px] font-black text-slate-400 uppercase">Pre. Neto</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="shrink-0">
-                <button className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-brand-red hover:shadow-xl hover:shadow-brand-red/20 transition-all active:scale-95 group/btn">
-                  <PlusCircle className="w-5 h-5 group-hover/btn:rotate-90 transition-transform" />
-                </button>
-              </div>
-            </div>
-
-          </div>
+          <ProductRow key={product.id} product={product} />
         ))}
 
         {/* Footer Info - Now Part of the Scrolled Card at the bottom */}
