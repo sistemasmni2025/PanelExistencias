@@ -115,26 +115,26 @@ const ProductRow = ({ product }) => {
           </div>
 
           {/* Fila 2: Detalle de Piso */}
-          <div className="flex-1 flex justify-between items-center bg-slate-900 border border-slate-800 px-3 rounded-xl shadow-lg relative overflow-hidden">
+          <div className="flex-1 flex justify-between items-center bg-[#1a2332] border border-[#232e42] px-3 rounded-xl shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
 
             <div className="flex flex-col items-center z-10">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Desc. Piso</span>
-              <span className="text-[10px] font-bold text-slate-200">{product.piso.desc}%</span>
+              <span className="text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Desc. Piso</span>
+              <span className="text-[10px] font-bold text-white">{product.piso.desc}%</span>
             </div>
             <div className="flex flex-col items-center z-10">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Promo P.</span>
-              <span className="text-[10px] font-bold text-slate-200">{product.piso.promo || '0.00'}%</span>
+              <span className="text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Promo P.</span>
+              <span className="text-[10px] font-bold text-white">{product.piso.promo || '0.00'}%</span>
             </div>
             <div className="flex flex-col items-center z-10">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Venta P.</span>
-              <span className="text-[10px] font-bold text-slate-200">${product.piso.venta.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Venta P.</span>
+              <span className="text-[10px] font-bold text-white">${product.piso.venta.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex flex-col items-center z-10">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">IVA P.</span>
-              <span className="text-[10px] font-bold text-slate-200">${product.piso.iva.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">IVA P.</span>
+              <span className="text-[10px] font-bold text-white">${product.piso.iva.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
-            <div className="flex flex-col items-center ml-2 pl-3 border-l border-slate-700/50 z-10">
+            <div className="flex flex-col items-center ml-2 pl-3 border-l border-[#2e3b52] z-10">
               <span className="text-[7px] font-black text-brand-red uppercase tracking-wider mb-0.5">P. Neto</span>
               <span className="text-[12px] font-black text-green-400">${product.piso.neto.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
@@ -164,7 +164,7 @@ const ProductRow = ({ product }) => {
             </button>
           </div>
 
-          <button className="flex-1 flex items-center justify-center bg-slate-900 text-white rounded-xl hover:bg-brand-red hover:shadow-xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-slate-800">
+          <button className="flex-1 flex items-center justify-center bg-[#1a2332] text-white rounded-xl hover:bg-brand-red hover:shadow-xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-[#232e42]">
             <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
           </button>
         </div>
@@ -275,12 +275,12 @@ const DataGrid = () => {
     <div className="relative animate-slide-up">
       {/* Table Header - Cascading Sticky (Fixed to top of Page Scroll) */}
       <div className="sticky top-0 z-[60] -mx-px">
-        <div className="bg-slate-900 border-b border-slate-800 shadow-xl rounded-t-[2.5rem] px-8 py-5">
+        <div className="bg-[#1a2332] border-b border-[#232e42] shadow-xl rounded-t-[2.5rem] px-8 py-5">
           <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-1 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">G / Clave</div>
-            <div className="col-span-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Información & status</div>
-            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Sucursales</div>
-            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Condiciones y Detalle de Piso</div>
+            <div className="col-span-1 text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">G / Clave</div>
+            <div className="col-span-3 text-[10px] font-bold text-blue-200 uppercase tracking-widest">Información & status</div>
+            <div className="col-span-4 text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">Sucursales</div>
+            <div className="col-span-4 text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">Condiciones y Detalle de Piso</div>
           </div>
         </div>
       </div>
