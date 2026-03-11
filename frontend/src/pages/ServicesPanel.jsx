@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import Sidebar from '../components/layout/Sidebar';
 import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
+import CartDrawer from '../components/cart/CartDrawer';
 import { Menu, XCircle, Home, LogOut } from 'lucide-react';
 
 const ServicesPanel = ({ onNavigateHome, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans antialiased relative">
@@ -61,7 +63,7 @@ const ServicesPanel = ({ onNavigateHome, onLogout }) => {
 
         {/* Global sticky header with search/actions */}
         <div className="shrink-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 z-30 shadow-sm">
-          <ServicesHeader />
+          <ServicesHeader onCartClick={() => setCartOpen(true)} />
         </div>
 
         {/* Scrollable Data Area - Single Scroll System */}
@@ -85,6 +87,9 @@ const ServicesPanel = ({ onNavigateHome, onLogout }) => {
           </div>
         </div>
       </main>
+
+      {/* Slide-over Cart Drawer */}
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 };

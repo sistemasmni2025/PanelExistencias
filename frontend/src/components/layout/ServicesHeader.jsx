@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, XCircle, Download, ShoppingCart } from 'lucide-react';
 
-const ServicesHeader = () => {
+const ServicesHeader = ({ onCartClick }) => {
   return (
     <div className="p-4 sm:p-6 bg-white">
       
@@ -22,7 +22,10 @@ const ServicesHeader = () => {
         {/* Global Controls & Cart */}
         <div className="flex items-center gap-4">
 
-          <div className="flex items-center gap-4 bg-white p-1.5 pr-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
+          <div 
+            onClick={onCartClick}
+            className="flex items-center gap-4 bg-white p-1.5 pr-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group"
+          >
             <div className="relative">
               <div className="p-2.5 bg-brand-red text-white rounded-xl shadow-lg shadow-brand-red/20 group-hover:scale-105 transition-transform">
                 <ShoppingCart className="w-5 h-5" />
