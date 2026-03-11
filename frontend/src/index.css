@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #C61928;
+  --color-brand-blue: #1B4D7E;
+  --color-brand-lightblue: #EBF4F6;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+
+  --font-sans: "Inter", "system-ui", "sans-serif";
+
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-slide-up: slideUp 0.4s ease-out forwards;
+  --animate-pulse-subtle: pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulseSubtle {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: .85;
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-slate-800 font-sans antialiased selection:bg-brand-red selection:text-white;
+    background-image: radial-gradient(circle at 100% 0%, var(--color-brand-lightblue) 0%, transparent 25%),
+      radial-gradient(circle at 0% 100%, #ffe4e6 0%, transparent 20%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-xl;
+  }
+
+  .glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-md border border-slate-700/50 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm border border-white shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-transparent transition-all;
+  }
+}
