@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Settings, HelpCircle, XCircle, FileSpreadsheet, PlusCircle, Download, ShoppingCart } from 'lucide-react';
+import { Search, XCircle, Download, ShoppingCart } from 'lucide-react';
 
 const ServicesHeader = () => {
   return (
@@ -20,18 +20,7 @@ const ServicesHeader = () => {
         </div>
 
         {/* Global Controls & Cart */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center bg-slate-100/80 p-1 rounded-xl border border-slate-200">
-            <button className="p-2 text-slate-500 hover:text-brand-blue hover:bg-white rounded-lg transition-all">
-              <Settings className="w-5 h-5" />
-            </button>
-            <button className="p-2 text-slate-500 hover:text-brand-blue hover:bg-white rounded-lg transition-all">
-              <FileSpreadsheet className="w-5 h-5" />
-            </button>
-            <button className="p-2 text-slate-500 hover:text-brand-blue hover:bg-white rounded-lg transition-all">
-              <HelpCircle className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="flex items-center gap-4">
 
           <div className="flex items-center gap-4 bg-white p-1.5 pr-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer group">
             <div className="relative">

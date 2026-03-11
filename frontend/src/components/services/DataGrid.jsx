@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronRight, ShoppingCart, PlusCircle, FileSpreadsheet, Minus, Plus } from 'lucide-react';
 
+const ALL_BRANCHES = [
+  'QRO', 'CEL', 'SLP', 'AGS', 'LEO',
+  'IRA', 'REN', 'GDL', 'SIL', 'IRC',
+  'LIC', 'BCE', 'TLA', 'WEB', 'ALT',
+  'BQRO', 'BJYA', 'VIGA', 'BALT', 'SJR'
+];
+
 const ProductRow = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
 
@@ -9,12 +16,11 @@ const ProductRow = ({ product }) => {
 
   return (
     <div className="grid grid-cols-12 gap-6 px-8 py-6 items-center hover:bg-slate-50/50 transition-all group">
-      
+
       {/* Col 1: Gamma & Branding */}
       <div className="col-span-1 flex flex-col items-center gap-3">
-        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-sm ${
-          product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'
-        }`}>
+        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-sm ${product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'
+          }`}>
           {product.g}
         </span>
         <div className="flex flex-col items-center">
@@ -34,14 +40,18 @@ const ProductRow = ({ product }) => {
             <FileSpreadsheet className="w-4 h-4" />
           </button>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-[11px] font-black text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 uppercase italic tracking-wide">
+          <span className="flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shadow-sm">
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">MSPN</span>
+            <span className="text-[11px] font-black text-slate-800 leading-none">{product.mspn}</span>
+          </span>
+          <span className="text-[11px] font-black text-red-600 bg-red-50 px-3 py-1 rounded border border-red-100 uppercase italic tracking-wide">
             {product.statusDetail}
           </span>
           <div className="h-3 w-px bg-slate-200"></div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            MSPN: <span className="text-slate-900 font-black">{product.mspn}</span>
+            {product.brand}
           </span>
         </div>
       </div>
@@ -49,79 +59,113 @@ const ProductRow = ({ product }) => {
       {/* Col 3: Branch Expansion - Increased Visibility */}
       <div className="col-span-4 px-2">
         <div className="grid grid-cols-5 gap-1.5">
-          {product.branches.map((br) => (
-            <div key={br.code} className={`flex flex-col items-center justify-center p-1.5 rounded-lg border min-w-[38px] transition-all ${
-              br.stock > 0 
-              ? 'bg-white border-slate-200 shadow-sm' 
-              : 'bg-slate-50/30 border-transparent opacity-20'
-            }`}>
-              <span className="text-[8px] font-black text-slate-500 mb-0.5 leading-none uppercase">{br.code}</span>
-              <span className={`text-[11px] font-black leading-none ${br.stock > 0 ? 'text-brand-blue' : 'text-slate-400'}`}>
-                {br.stock}
-              </span>
-            </div>
-          ))}
+          {ALL_BRANCHES.map((branchCode) => {
+            const br = product.branches.find(b => b.code === branchCode) || { code: branchCode, stock: 0 };
+            return (
+              <div key={br.code} className={`flex flex-col items-center justify-center p-1.5 rounded-lg border min-w-[38px] transition-all ${br.stock > 0
+                ? 'bg-white border-slate-200 shadow-sm'
+                : 'bg-slate-50/30 border-transparent opacity-20'
+                }`}>
+                <span className="text-[8px] font-black text-slate-500 mb-0.5 leading-none uppercase">{br.code}</span>
+                <span className={`text-[11px] font-black leading-none ${br.stock > 0 ? 'text-brand-blue' : 'text-slate-400'}`}>
+                  {br.stock}
+                </span>
+              </div>
+            );
+          })}
         </div>
         <div className="mt-3 flex items-center justify-between px-1">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Red de Plazas</p>
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">Producto(s)</p>
           <p className="text-[12px] font-black text-slate-800 leading-none">
-            DISPONIBLE: <span className="text-brand-red ml-1">{product.stock}</span>
+            DISPONIBLE(S): <span className="text-brand-red ml-1">{product.stock}</span>
           </p>
         </div>
       </div>
 
       {/* Col 4: Complex Commercial Details & Quantity Control */}
-      <div className="col-span-4 flex items-center gap-6">
-        <div className="flex-1 space-y-3 text-right">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-            <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">P. Lista</p>
-              <p className="text-[14px] font-black text-slate-700">${product.priceList.toLocaleString()}</p>
+      <div className="col-span-4 flex items-stretch gap-3 h-[84px]">
+        <div className="flex-1 flex flex-col gap-2">
+
+          {/* Fila 1: Precios Base */}
+          <div className="flex-1 flex justify-between items-center bg-white border border-slate-200 px-3 rounded-xl shadow-sm">
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">N. Parte</span>
+              <span className="text-[10px] font-black text-slate-800">{product.mspn}</span>
             </div>
-            <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Desc / Promo</p>
-              <p className="text-[14px] font-black text-brand-red">{product.discountPercent}% <span className="text-slate-300 font-medium">/</span> {product.promotion}%</p>
+            <div className="w-px h-6 bg-slate-100"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">P. Lista</span>
+              <span className="text-[10px] font-black text-slate-800">${product.priceList.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="w-px h-6 bg-slate-100"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Desc</span>
+              <span className="text-[10px] font-black text-brand-red">{product.discountPercent}%</span>
+            </div>
+            <div className="w-px h-6 bg-slate-100"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Promo</span>
+              <span className="text-[10px] font-black text-brand-red">{product.promotion}%</span>
+            </div>
+            <div className="w-px h-6 bg-slate-100"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">%NC</span>
+              <span className="text-[10px] font-black text-amber-500">{product.ncPercent}%</span>
             </div>
           </div>
-          
-          <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden group/piso">
-            <div className="absolute top-0 right-0 w-12 h-12 bg-white/5 rounded-full blur-2xl -mr-4 -mt-4"></div>
-            <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">
-              <span>Detalle de Piso</span>
-              <span>IVA INC.</span>
+
+          {/* Fila 2: Detalle de Piso */}
+          <div className="flex-1 flex justify-between items-center bg-slate-900 border border-slate-800 px-3 rounded-xl shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-2xl -mr-8 -mt-8"></div>
+
+            <div className="flex flex-col items-center z-10">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Desc. Piso</span>
+              <span className="text-[10px] font-bold text-slate-200">{product.piso.desc}%</span>
             </div>
-            <div className="flex justify-between items-baseline">
-              <span className="text-[16px] font-black text-green-400 drop-shadow-sm">${product.piso.neto.toLocaleString()}</span>
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Precio Neto</span>
+            <div className="flex flex-col items-center z-10">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Promo P.</span>
+              <span className="text-[10px] font-bold text-slate-200">{product.piso.promo || '0.00'}%</span>
+            </div>
+            <div className="flex flex-col items-center z-10">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Venta P.</span>
+              <span className="text-[10px] font-bold text-slate-200">${product.piso.venta.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex flex-col items-center z-10">
+              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">IVA P.</span>
+              <span className="text-[10px] font-bold text-slate-200">${product.piso.iva.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex flex-col items-center ml-2 pl-3 border-l border-slate-700/50 z-10">
+              <span className="text-[7px] font-black text-brand-red uppercase tracking-wider mb-0.5">P. Neto</span>
+              <span className="text-[12px] font-black text-green-400">${product.piso.neto.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>
 
         {/* Quantity Selector & Action */}
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-            <button 
+        <div className="flex flex-col gap-2 shrink-0 w-[100px]">
+          <div className="flex-1 flex items-center justify-between bg-slate-100 px-1 rounded-xl border border-slate-200 shadow-inner">
+            <button
               onClick={handleDecrement}
-              className="p-1.5 hover:bg-white hover:text-brand-red rounded-xl transition-all active:scale-90 text-slate-400"
+              className="p-1 hover:bg-white hover:text-brand-red rounded-lg transition-all active:scale-90 text-slate-400 bg-transparent"
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <input 
-              type="number" 
+            <input
+              type="number"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-10 text-center bg-transparent border-none text-xs font-black text-slate-800 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:ring-0"
+              className="w-full text-center bg-transparent border-none text-[12px] font-black text-slate-800 p-0 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
-            <button 
+            <button
               onClick={handleIncrement}
-              className="p-1.5 hover:bg-white hover:text-brand-blue rounded-xl transition-all active:scale-90 text-slate-400"
+              className="p-1 hover:bg-white hover:text-brand-blue rounded-lg transition-all active:scale-90 text-slate-400 bg-transparent"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
-          
-          <button className="w-full flex items-center justify-center p-4 bg-slate-900 text-white rounded-2xl hover:bg-brand-red hover:shadow-2xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-slate-800">
-            <PlusCircle className="w-5 h-5 group-hover/btn:rotate-90 transition-transform" />
+
+          <button className="flex-1 flex items-center justify-center bg-slate-900 text-white rounded-xl hover:bg-brand-red hover:shadow-xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-slate-800">
+            <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
           </button>
         </div>
       </div>
@@ -235,8 +279,8 @@ const DataGrid = () => {
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-1 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">G / Clave</div>
             <div className="col-span-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Información & status</div>
-            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Sucursales (Red Completa)</div>
-            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Detalle Comercial & Precios</div>
+            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Sucursales</div>
+            <div className="col-span-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Condiciones y Detalle de Piso</div>
           </div>
         </div>
       </div>
