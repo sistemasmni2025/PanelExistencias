@@ -29,7 +29,7 @@ const ServicesPanel = ({ onNavigateHome, onLogout }) => {
               className="p-2 -ml-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-3 group"
             >
               <Menu className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden sm:inline">Explorar Filtros</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden sm:inline">Filtros</span>
             </button>
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>

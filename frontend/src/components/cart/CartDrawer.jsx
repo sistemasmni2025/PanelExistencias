@@ -6,32 +6,31 @@ const CartDrawer = ({ isOpen, onClose }) => {
     <>
       {/* Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 transition-opacity"
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
-      <div 
-        className={`fixed inset-y-0 right-0 w-full md:w-[600px] xl:w-[800px] bg-slate-50 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <div
+        className={`fixed inset-y-0 right-0 w-full md:w-[600px] xl:w-[800px] bg-slate-50 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Header */}
         <div className="bg-[#1a2332] text-white px-6 py-4 flex items-center justify-between shrink-0 shadow-lg relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-red/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-          
+
           <div className="flex items-center gap-4 relative z-10">
             <div className="p-2.5 bg-brand-red rounded-xl shadow-lg shadow-brand-red/20">
               <ShoppingCart className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="text-sm font-black uppercase tracking-widest">Resumen de Compra</h2>
-              <p className="text-[10px] font-bold text-blue-200">Sucursal Base: LA VIGA</p>
+              <p className="text-[10px] font-bold text-blue-200">Sucursal: LA VIGA</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 bg-white/5 hover:bg-brand-red text-slate-300 hover:text-white rounded-xl transition-all relative z-10"
           >
@@ -41,7 +40,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
         {/* Content - Mockup Items */}
         <div className="flex-1 overflow-auto p-6 space-y-4">
-          
+
           {/* Item Headers (PC) */}
           <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-sm mb-4 sticky top-0 z-10">
             <div className="col-span-2 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Clave / N.Parte</div>
@@ -54,13 +53,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
           {/* Empty State Mockup or Single Item Mock */}
           <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex flex-col gap-4 relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-1 h-full bg-brand-blue"></div>
-            
+
             <div className="flex flex-col md:grid md:grid-cols-12 gap-4 items-center">
               <div className="md:col-span-2 flex flex-col items-center">
                 <span className="text-xs font-black text-slate-800">AAU-163</span>
                 <span className="text-[10px] font-bold text-slate-400">17418</span>
               </div>
-              
+
               <div className="md:col-span-4 flex flex-col text-center md:text-left">
                 <span className="text-xs font-black text-slate-800">205/65R15 94H TIGAR HIGH PERF 4001</span>
                 <span className="text-[10px] font-bold text-slate-400">MICHELIN</span>
@@ -96,17 +95,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
                 </button>
               </div>
             </div>
-            
-            {/* Input para especificar sustituto (como en la imagen original) */}
-            <div className="mt-2 pl-4 border-l-2 border-slate-100">
-              <input 
-                type="text" 
-                placeholder="Especifica el sustituto (Opcional)"
-                className="w-full text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-brand-blue/50 focus:border-brand-blue outline-none transition-all placeholder:text-slate-400"
-              />
-            </div>
           </div>
-          
+
           {/* Información */}
           <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 p-4 rounded-xl">
             <AlertCircle className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
@@ -119,14 +109,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
         {/* Footer - Totals & Actions */}
         <div className="bg-white border-t border-slate-200 p-6 shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.05)]">
-          
+
           {/* Observación general */}
           <div className="mb-6">
             <label className="block text-[10px] font-black text-brand-red uppercase tracking-widest mb-2">
               Observación General:
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Agrega comentarios sobre tu pedido..."
               className="w-full text-sm font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition-all placeholder:text-slate-400 placeholder:font-medium"
             />
@@ -134,13 +124,13 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
           <div className="flex flex-col md:flex-row items-end justify-between gap-6">
             <div className="flex gap-3 w-full md:w-auto">
-              <button 
+              <button
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 hover:bg-brand-red text-slate-500 hover:text-white rounded-xl font-bold text-[11px] tracking-widest uppercase transition-all shadow-sm hover:shadow-lg hover:shadow-brand-red/20 group"
               >
                 <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Descartar
               </button>
-              <button 
+              <button
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-[#1a2332] hover:bg-brand-blue text-white rounded-xl font-black text-[11px] tracking-widest uppercase transition-all shadow-lg shadow-brand-blue/20 hover:shadow-xl hover:shadow-brand-blue/30 hover:-translate-y-0.5 group"
               >
                 <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
