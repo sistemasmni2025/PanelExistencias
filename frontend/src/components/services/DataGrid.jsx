@@ -119,8 +119,8 @@ const ProductRow = ({ product }) => {
           </div>
 
           {/* Fila 2: Detalle de Piso */}
-          <div className="flex-1 flex justify-between items-center bg-[#1a2332] border border-[#232e42] px-2 lg:px-3 py-2 lg:py-0 rounded-xl shadow-lg relative overflow-hidden overflow-x-auto lg:overflow-hidden hide-scrollbar-mobile">
-            <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
+          <div className="flex-1 flex justify-between items-center bg-[#003d7a] border border-[#002b5e] px-2 lg:px-3 py-2 lg:py-0 rounded-xl shadow-lg relative overflow-hidden overflow-x-auto lg:overflow-hidden hide-scrollbar-mobile">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#ffce00]/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
 
             <div className="flex flex-col items-center z-10 min-w-[40px] lg:min-w-0">
               <span className="text-[6px] lg:text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Desc. Piso</span>
@@ -168,7 +168,7 @@ const ProductRow = ({ product }) => {
             </button>
           </div>
 
-          <button className="flex-1 flex items-center justify-center bg-[#1a2332] text-white py-3 lg:py-0 rounded-xl hover:bg-brand-red hover:shadow-xl hover:shadow-brand-red/30 transition-all active:scale-95 group/btn border border-[#232e42]">
+          <button className="flex-1 flex items-center justify-center bg-[#ffce00] text-[#002b5e] py-3 lg:py-0 rounded-xl hover:bg-[#e6ba00] hover:shadow-xl hover:shadow-[#ffce00]/40 transition-all active:scale-95 group/btn border border-[#e6ba00]">
             <ShoppingCart className="w-5 h-5 lg:w-4 lg:h-4 group-hover/btn:scale-110 transition-transform" />
             <span className="ml-2 text-xs font-black uppercase tracking-wider block sm:hidden">Añadir</span>
           </button>
@@ -280,7 +280,8 @@ const DataGrid = () => {
     <div className="relative animate-slide-up">
       {/* Table Header - Cascading Sticky (Fixed to top of Page Scroll) - Hidden on Mobile */}
       <div className="hidden lg:block sticky top-0 z-[60] -mx-px">
-        <div className="bg-[#1a2332] border-b border-[#232e42] shadow-xl rounded-t-[2.5rem] px-8 py-5">
+        <div className="bg-[#003d7a] border-b border-[#ffce00] shadow-xl rounded-t-[2.5rem] px-8 py-5 relative overflow-hidden">
+          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-1 text-[10px] font-bold text-blue-200 uppercase tracking-widest text-center">Gamma / Clave</div>
             <div className="col-span-3 text-[10px] font-bold text-blue-200 uppercase tracking-widest">Información & status</div>

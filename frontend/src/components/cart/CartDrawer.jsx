@@ -18,8 +18,8 @@ const CartDrawer = ({ isOpen, onClose }) => {
           }`}
       >
         {/* Header */}
-        <div className="bg-[#1a2332] text-white px-6 py-4 flex items-center justify-between shrink-0 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-red/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="bg-[#003d7a] text-white px-6 py-4 flex items-center justify-between shrink-0 shadow-lg relative overflow-hidden border-b-[3px] border-[#ffce00]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#ffce00]/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
           <div className="flex items-center gap-4 relative z-10">
             <div className="p-2.5 bg-brand-red rounded-xl shadow-lg shadow-brand-red/20">
@@ -32,7 +32,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-white/5 hover:bg-brand-red text-slate-300 hover:text-white rounded-xl transition-all relative z-10"
+            className="p-2 bg-white/5 hover:bg-[#ffce00] text-slate-100 hover:text-[#003d7a] rounded-xl transition-all relative z-10"
           >
             <X className="w-5 h-5" />
           </button>
@@ -131,7 +131,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
                 Descartar
               </button>
               <button
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-[#1a2332] hover:bg-brand-blue text-white rounded-xl font-black text-[11px] tracking-widest uppercase transition-all shadow-lg shadow-brand-blue/20 hover:shadow-xl hover:shadow-brand-blue/30 hover:-translate-y-0.5 group"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ffce00] hover:bg-[#e6ba00] text-[#002b5e] rounded-xl font-black text-[11px] tracking-widest uppercase transition-all shadow-lg shadow-[#ffce00]/30 hover:shadow-xl hover:shadow-[#ffce00]/40 hover:-translate-y-0.5 group border border-[#e6ba00]"
               >
                 <Save className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Guardar Pedido
@@ -150,7 +150,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
               <div className="w-full h-px bg-slate-200 my-1"></div>
               <div className="flex justify-between w-full md:w-48 items-center mt-1">
                 <span className="text-[12px] font-black text-slate-800 uppercase tracking-widest">Total</span>
-                <span className="text-xl font-black text-[#1a2332]">$2,371.62</span>
+                <span className="text-xl font-black text-[#003d7a]">$2,371.62</span>
               </div>
             </div>
           </div>

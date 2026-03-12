@@ -3,9 +3,9 @@ import Sidebar from '../components/layout/Sidebar';
 import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
 import CartDrawer from '../components/cart/CartDrawer';
-import { Menu, XCircle, Home, LogOut } from 'lucide-react';
+import { Menu, XCircle, Home, LogOut, FileText } from 'lucide-react';
 
-const ServicesPanel = ({ onNavigateHome, onLogout }) => {
+const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -22,8 +22,10 @@ const ServicesPanel = ({ onNavigateHome, onLogout }) => {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
 
         {/* Universal Header Overlay to show toggle button (PC & Mobile) */}
-        <div className="h-14 bg-slate-900 flex items-center px-6 border-b border-slate-700 shrink-0 z-40 shadow-xl">
-          <div className="flex items-center gap-4">
+        <div className="h-14 bg-[#003d7a] flex items-center px-6 border-b border-[#002b5e] shrink-0 z-40 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-1/4 w-32 h-32 bg-[#ffce00]/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#ffce00]"></div>
+          <div className="flex items-center gap-4 relative z-10">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 -ml-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-3 group"
@@ -35,13 +37,24 @@ const ServicesPanel = ({ onNavigateHome, onLogout }) => {
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
             <button
-              onClick={onNavigateHome}
-              className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
-              title="Volver al Menú"
-            >
-              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
-          </div>
+               onClick={onNavigateHome}
+               className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
+               title="Volver al Menú"
+             >
+               <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+             </button>
+
+            <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
+
+            <button
+               onClick={onNavigateOrders}
+               className="p-2 text-slate-300 hover:text-white hover:bg-[#ffce00] hover:text-[#003d7a] rounded-xl transition-all flex items-center gap-2 group"
+               title="Ver Mis Pedidos"
+             >
+               <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Mis Pedidos</span>
+             </button>
+           </div>
 
           <div className="ml-auto flex items-center gap-6">
             <div className="h-4 w-px bg-slate-700 hidden sm:block"></div>

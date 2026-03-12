@@ -11,11 +11,11 @@ const HomeDashboard = ({ onNavigate }) => {
       color: 'bg-brand-red' 
     },
     { 
-      id: 'purchases', 
-      title: 'Compras y Proveedores', 
-      description: 'Solicitudes de compra, seguimiento de pedidos y status FDN.', 
+      id: 'orders', 
+      title: 'Mis Pedidos', 
+      description: 'Consultar status, facturas y detalle de todos los pedidos realizados.', 
       icon: ShoppingCart, 
-      color: 'bg-brand-blue' 
+      color: 'bg-[#ffce00] text-[#002b5e]' 
     },
     { 
       id: 'reports', 
@@ -51,7 +51,7 @@ const HomeDashboard = ({ onNavigate }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {panels
-            .filter(panel => panel.id === 'services')
+            .filter(panel => panel.id === 'services' || panel.id === 'orders')
             .map((panel, idx) => {
             const Icon = panel.icon;
             return (
@@ -66,8 +66,8 @@ const HomeDashboard = ({ onNavigate }) => {
                 <div className="absolute inset-0 bg-gradient-to-br from-white to-brand-lightblue/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
                 
                 <div className="relative z-10 flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-                  <div className={`${panel.color} p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
-                    <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  <div className={`${panel.color.includes('text') ? panel.color : panel.color + ' text-white'} p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
+                    <Icon className="w-6 h-6 sm:w-8 sm:h-8" />
                   </div>
                   
                   <div className="flex-1">
