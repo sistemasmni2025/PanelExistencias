@@ -85,10 +85,10 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
 
         {/* Scrollable Data Area - Single Scroll System */}
         <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
-          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-6 sm:pt-8 md:pt-10">
+          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
 
-            {/* Filter Indicator Section - Now with pt-8 added specifically here */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 sm:pt-6 md:pt-8">
+            {/* Filter Indicator Section - Now with tighter padding */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
               <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">

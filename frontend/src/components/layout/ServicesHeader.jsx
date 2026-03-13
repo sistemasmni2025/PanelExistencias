@@ -3,10 +3,10 @@ import { Search, XCircle, Download, ShoppingCart } from 'lucide-react';
 
 const ServicesHeader = ({ onCartClick }) => {
   return (
-    <div className="p-4 sm:p-6 bg-white">
+    <div className="py-2 px-4 sm:px-6 bg-white">
       
       {/* Top action row - High Impact & Compact */}
-      <div className="flex items-center justify-between gap-4 mb-4">
+      <div className="flex items-center justify-between gap-4">
         {/* Search Input - Main Focus Now */}
         <div className="flex-1 relative group">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -15,7 +15,7 @@ const ServicesHeader = ({ onCartClick }) => {
           <input 
             type="text" 
             placeholder="Buscar por descripción, marca o código..." 
-            className="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all text-sm font-medium shadow-sm hover:bg-slate-100/50"
+            className="block w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all text-sm font-medium shadow-sm hover:bg-slate-100/50"
           />
         </div>
 
