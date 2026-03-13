@@ -61,7 +61,7 @@ const ProductRow = ({ product }) => {
         <div className="flex lg:hidden justify-between items-center mb-2">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sucursales</span>
         </div>
-        
+
         <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-5 gap-1.5 lg:gap-2">
           {ALL_BRANCHES.map((branchCode) => {
             const br = product.branches.find(b => b.code === branchCode) || { code: branchCode, stock: 0 };

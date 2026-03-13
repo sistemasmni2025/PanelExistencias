@@ -75,32 +75,36 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
           </div>
         </div>
 
-        {/* Michelin Slim Promo Banner - Now above the search bar */}
-        <PromoBanner />
+        {/* Unified Sticky Header System - No Lines, Pure Floating Info */}
+        <div className="shrink-0 sticky top-0 z-30 bg-white/90 backdrop-blur-xl shadow-lg shadow-slate-200/50">
+          {/* Layer 1: Promo Banner (Branding) */}
+          <PromoBanner />
 
-        {/* Global sticky header with search/actions */}
-        <div className="shrink-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 z-30 shadow-sm">
-          <ServicesHeader onCartClick={() => setCartOpen(true)} />
-        </div>
+          {/* Layer 2: Global Search / Actions Header - Border removed */}
+          <div className="">
+            <ServicesHeader onCartClick={() => setCartOpen(true)} />
+          </div>
 
-        {/* Scrollable Data Area - Single Scroll System */}
-        <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
-          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
-
-            {/* Filter Indicator Section - Now with tighter padding */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
-              <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
+          {/* Layer 3: Filter Indicator Section - No Background/Border, just floating info */}
+          <div className="px-4 sm:px-6 md:px-8 py-2 pb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center gap-3 px-1">
                 <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
                   Resultados Filtrados: <span className="text-brand-red">MICHELIN</span>
                 </span>
                 <XCircle className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic bg-slate-100 px-3 py-1 rounded-lg">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
                 Sincronización Cloud: 10:30 AM
               </span>
             </div>
+          </div>
+        </div>
 
+        {/* Scrollable Data Area - Single Scroll System */}
+        <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
+          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
             <DataGrid />
           </div>
         </div>
