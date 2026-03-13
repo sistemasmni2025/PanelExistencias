@@ -3,6 +3,7 @@ import Sidebar from '../components/layout/Sidebar';
 import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
 import CartDrawer from '../components/cart/CartDrawer';
+import PromoBanner from '../components/layout/PromoBanner';
 import { Menu, XCircle, Home, LogOut, FileText } from 'lucide-react';
 
 const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
@@ -37,24 +38,24 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
             <button
-               onClick={onNavigateHome}
-               className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
-               title="Volver al Menú"
-             >
-               <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
-             </button>
+              onClick={onNavigateHome}
+              className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
+              title="Volver al Menú"
+            >
+              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
             <button
-               onClick={onNavigateOrders}
-               className="p-2 text-slate-300 hover:text-white hover:bg-[#ffce00] hover:text-[#003d7a] rounded-xl transition-all flex items-center gap-2 group"
-               title="Ver Mis Pedidos"
-             >
-               <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Mis Pedidos</span>
-             </button>
-           </div>
+              onClick={onNavigateOrders}
+              className="p-2 text-slate-300 hover:text-white hover:bg-[#ffce00] hover:text-[#003d7a] rounded-xl transition-all flex items-center gap-2 group"
+              title="Ver Mis Pedidos"
+            >
+              <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Mis Pedidos</span>
+            </button>
+          </div>
 
           <div className="ml-auto flex items-center gap-6">
             <div className="h-4 w-px bg-slate-700 hidden sm:block"></div>
@@ -74,6 +75,9 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
           </div>
         </div>
 
+        {/* Michelin Slim Promo Banner - Now above the search bar */}
+        <PromoBanner />
+
         {/* Global sticky header with search/actions */}
         <div className="shrink-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 z-30 shadow-sm">
           <ServicesHeader onCartClick={() => setCartOpen(true)} />
@@ -81,7 +85,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
 
         {/* Scrollable Data Area - Single Scroll System */}
         <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
-          <div className="w-full mx-auto space-y-8 animate-slide-up p-4 sm:p-6 md:p-8 pt-0 sm:pt-0 md:pt-0">
+          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-6 sm:pt-8 md:pt-10">
+
             {/* Filter Indicator Section - Now with pt-8 added specifically here */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 sm:pt-6 md:pt-8">
               <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
