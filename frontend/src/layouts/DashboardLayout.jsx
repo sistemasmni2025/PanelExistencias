@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import HomeDashboard from '../pages/HomeDashboard';
+// import HomeDashboard from '../pages/HomeDashboard';
 import ServicesPanel from '../pages/ServicesPanel';
 import OrdersPanel from '../pages/OrdersPanel';
 
@@ -9,14 +9,14 @@ const DashboardLayout = ({ onLogout }) => {
   return (
     <div className="h-screen w-full relative bg-slate-50">
       
-      {/* Navigation Layer */}
-      {activeView === 'home' && (
+      {/* Navigation Layer - Home Disabled as per request */}
+      {/* activeView === 'home' && (
         <HomeDashboard onNavigate={(id) => setActiveView(id)} />
-      )}
+      ) */}
 
       {activeView === 'services' && (
         <ServicesPanel 
-          onNavigateHome={() => setActiveView('home')} 
+          onNavigateHome={() => {/* setActiveView('home') - Disabled */}} 
           onNavigateOrders={() => setActiveView('orders')}
           onLogout={onLogout} 
         />
@@ -24,7 +24,7 @@ const DashboardLayout = ({ onLogout }) => {
 
       {activeView === 'orders' && (
         <OrdersPanel 
-          onNavigateHome={() => setActiveView('home')} 
+          onNavigateHome={() => {/* setActiveView('home') - Disabled */}} 
           onNavigateServices={() => setActiveView('services')}
           onLogout={onLogout} 
         />

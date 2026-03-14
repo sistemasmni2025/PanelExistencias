@@ -18,6 +18,8 @@ const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout }) => {
           <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#ffce00]"></div>
           
           <div className="flex items-center gap-4 relative z-10">
+            {/* Home button commented out as per request */}
+            {/* 
             <button
               onClick={onNavigateHome}
               className="p-2 -ml-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
@@ -28,6 +30,7 @@ const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout }) => {
             </button>
 
             <div className="h-4 w-px bg-slate-400 mx-2 hidden sm:block"></div>
+            */}
 
             <button
               onClick={onNavigateServices}

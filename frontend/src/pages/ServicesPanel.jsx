@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/layout/Sidebar';
 import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
+import PrimasFdnPanel from '../components/services/PrimasFdnPanel';
 import CartDrawer from '../components/cart/CartDrawer';
 import PromoBanner from '../components/layout/PromoBanner';
 import { Menu, XCircle, Home, LogOut, FileText } from 'lucide-react';
@@ -9,6 +10,8 @@ import { Menu, XCircle, Home, LogOut, FileText } from 'lucide-react';
 const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('existencias');
+
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans antialiased relative">
@@ -37,6 +40,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
+            {/* Home button commented out as per request */}
+            {/* 
             <button
               onClick={onNavigateHome}
               className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
@@ -46,6 +51,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
             </button>
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
+            */}
 
             <button
               onClick={onNavigateOrders}
@@ -54,6 +60,21 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
             >
               <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Mis Pedidos</span>
+            </button>
+
+            <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
+
+            <button
+              onClick={() => setActiveTab(activeTab === 'primas_fdn' ? 'existencias' : 'primas_fdn')}
+              className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${
+                activeTab === 'primas_fdn' 
+                ? 'bg-[#ffce00] text-[#003d7a]' 
+                : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title="Ver Primas y FDN"
+            >
+              <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Primas y FDN</span>
             </button>
           </div>
 
@@ -75,39 +96,57 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
           </div>
         </div>
 
-        {/* Unified Sticky Header System - No Lines, Pure Floating Info */}
-        <div className="shrink-0 sticky top-0 z-30 bg-white/90 backdrop-blur-xl shadow-lg shadow-slate-200/50">
-          {/* Layer 1: Promo Banner (Branding) */}
-          <PromoBanner />
+        {activeTab === 'existencias' ? (
+          <>
+            {/* Unified Sticky Header System - No Lines, Pure Floating Info */}
+            <div className="shrink-0 sticky top-0 z-30 bg-white/90 backdrop-blur-xl shadow-lg shadow-slate-200/50">
+              {/* Layer 1: Promo Banner (Branding) */}
+              <PromoBanner />
 
-          {/* Layer 2: Global Search / Actions Header - Border removed */}
-          <div className="">
-            <ServicesHeader onCartClick={() => setCartOpen(true)} />
-          </div>
-
-          {/* Layer 3: Filter Indicator Section - No Background/Border, just floating info */}
-          <div className="px-4 sm:px-6 md:px-8 py-2 pb-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3 px-1">
-                <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Resultados Filtrados: <span className="text-brand-red">MICHELIN</span>
-                </span>
-                <XCircle className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" />
+              {/* Layer 2: Global Search / Actions Header - Border removed */}
+              <div className="">
+                <ServicesHeader onCartClick={() => setCartOpen(true)} />
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
-                Sincronización Cloud: 10:30 AM
-              </span>
+
+              {/* Layer 3: Filter Indicator Section - No Background/Border, just floating info */}
+              <div className="px-4 sm:px-6 md:px-8 py-2 pb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-3 px-1">
+                    <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Resultados Filtrados: <span className="text-brand-red">MICHELIN</span>
+                    </span>
+                    <XCircle className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
+                    Sincronización Cloud: 10:30 AM
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Data Area - Single Scroll System */}
+            <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
+              <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
+                <DataGrid />
+              </div>
+            </div>
+          </>
+        ) : activeTab === 'primas_fdn' ? (
+          <div className="flex-1 overflow-hidden">
+            <PrimasFdnPanel />
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-slate-50">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <FileText className="w-10 h-10 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Módulo en Desarrollo</h3>
+              <p className="text-xs text-slate-500 mt-2">Esta sección ({tabs.find(t => t.id === activeTab)?.label}) estará disponible próximamente.</p>
             </div>
           </div>
-        </div>
-
-        {/* Scrollable Data Area - Single Scroll System */}
-        <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
-          <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
-            <DataGrid />
-          </div>
-        </div>
+        )}
       </main>
 
       {/* Slide-over Cart Drawer */}
