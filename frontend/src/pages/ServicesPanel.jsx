@@ -5,7 +5,7 @@ import DataGrid from '../components/services/DataGrid';
 import PrimasFdnPanel from '../components/services/PrimasFdnPanel';
 import CartDrawer from '../components/cart/CartDrawer';
 import PromoBanner from '../components/layout/PromoBanner';
-import { Menu, XCircle, Home, LogOut, FileText } from 'lucide-react';
+import { Menu, XCircle, Home, LogOut, FileText, Truck } from 'lucide-react';
 
 const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,18 +40,20 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
-            {/* Home button commented out as per request */}
-            {/* 
             <button
-              onClick={onNavigateHome}
-              className="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-2 group"
-              title="Volver al Menú"
+               onClick={() => setActiveTab('existencias')}
+               className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${
+                 activeTab === 'existencias' 
+                 ? 'bg-[#ffce00] text-[#003d7a]' 
+                 : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+               title="Consultar Existencias"
             >
-              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <Truck className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Existencias</span>
             </button>
 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
-            */}
 
             <button
               onClick={onNavigateOrders}

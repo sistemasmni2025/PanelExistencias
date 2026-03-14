@@ -26,29 +26,29 @@ const PrimasFdnPanel = () => {
   return (
     <div className="flex flex-col h-full bg-slate-100 animate-fade-in">
       {/* PDF Viewer Interface Simulation */}
-      <div className="bg-[#323639] text-white h-12 flex items-center justify-between px-4 shrink-0 shadow-lg z-20">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-300">com.existencias.areporteasociadosgastosb</span>
+      <div className="bg-[#323639] text-white h-12 flex items-center justify-between px-2 md:px-4 shrink-0 shadow-lg z-20">
+        <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+          <div className="hidden sm:flex items-center gap-2 truncate">
+            <span className="text-xs font-medium text-slate-300 truncate max-w-[150px] md:max-w-none">com.existencias.areporteasociadosgastosb</span>
           </div>
-          <div className="h-4 w-px bg-slate-600"></div>
-          <div className="flex items-center gap-2">
-            <button className="p-1.5 hover:bg-white/10 rounded transition-colors"><ChevronLeft className="w-4 h-4" /></button>
-            <span className="text-[11px] bg-[#1a1c1e] px-2 py-0.5 rounded border border-slate-700">1 / 1</span>
-            <button className="p-1.5 hover:bg-white/10 rounded transition-colors"><ChevronRight className="w-4 h-4" /></button>
+          <div className="hidden sm:block h-4 w-px bg-slate-600"></div>
+          <div className="flex items-center gap-1 md:gap-2">
+            <button className="p-1 hover:bg-white/10 rounded transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+            <span className="text-[10px] md:text-[11px] bg-[#1a1c1e] px-1.5 md:px-2 py-0.5 rounded border border-slate-700 whitespace-nowrap">1 / 1</span>
+            <button className="p-1 hover:bg-white/10 rounded transition-colors"><ChevronRight className="w-4 h-4" /></button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 bg-[#1a1c1e] px-3 py-1 rounded border border-slate-700">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1 bg-[#1a1c1e] px-2 md:px-3 py-1 rounded border border-slate-700">
             <button 
               onClick={handleZoomOut}
               className="p-1 hover:text-brand-blue disabled:opacity-30 transition-colors"
               disabled={zoom <= 50}
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <ZoomOut className="w-3 md:w-3.5 h-3 md:h-3.5" />
             </button>
-            <span className="text-[10px] font-bold min-w-[30px] text-center font-mono">
+            <span className="text-[9px] md:text-[10px] font-bold min-w-[25px] md:min-w-[30px] text-center font-mono">
               {zoom}%
             </span>
             <button 
@@ -56,31 +56,31 @@ const PrimasFdnPanel = () => {
               className="p-1 hover:text-brand-blue disabled:opacity-30 transition-colors"
               disabled={zoom >= 200}
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <ZoomIn className="w-3 md:w-3.5 h-3 md:h-3.5" />
             </button>
           </div>
-          <div className="h-4 w-px bg-slate-600"></div>
-          <div className="flex items-center gap-2">
+          <div className="h-4 w-px bg-slate-600 hidden xs:block"></div>
+          <div className="flex items-center gap-1 md:gap-2">
             <button 
               onClick={handleDownload}
-              className="p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
+              className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
               title="Descargar"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 md:w-4 h-3.5 md:h-4" />
             </button>
             <button 
               onClick={handlePrint}
-              className="p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
+              className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
               title="Imprimir"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-3.5 md:w-4 h-3.5 md:h-4" />
             </button>
             <button 
               onClick={handleShare}
-              className="p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
+              className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-all text-slate-300 hover:text-white" 
               title="Compartir"
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-3.5 md:w-4 h-3.5 md:h-4" />
             </button>
           </div>
         </div>
@@ -91,31 +91,31 @@ const PrimasFdnPanel = () => {
           className="w-full max-w-[1000px] bg-white shadow-xl p-4 md:p-8 lg:p-12 min-h-[1400px] relative shadow-slate-300 mx-auto transition-transform duration-200 origin-top"
           style={{ transform: `scale(${zoom / 100})` }}
         >
-            <div className="w-full flex justify-between items-start mb-10">
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 bg-brand-red flex items-center justify-center rounded-2xl shadow-lg relative overflow-hidden">
-                  <img src="/assets/logo/icon.png" alt="Logo" className="w-12 h-12 object-contain invert brightness-0" />
+            <div className="w-full flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6 sm:gap-0 mb-8 md:mb-10">
+              <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 text-center sm:text-left">
+                <div className="w-16 md:w-20 h-16 md:h-20 bg-brand-red flex items-center justify-center rounded-2xl shadow-lg relative overflow-hidden shrink-0">
+                  <img src="/assets/logo/icon.png" alt="Logo" className="w-10 md:w-12 h-10 md:h-12 object-contain invert brightness-0" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-brand-red tracking-tighter leading-none mb-1">MULTI LLANTAS NIETO</h1>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest leading-none">Servicios Automotrices Especializados</p>
+                  <h1 className="text-xl md:text-3xl font-black text-brand-red tracking-tighter leading-none mb-1">MULTI LLANTAS NIETO</h1>
+                  <p className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest leading-none">Servicios Automotrices Especializados</p>
                 </div>
               </div>
-              <div className="text-right">
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Folio Interno:</p>
-                 <p className="text-xl font-black text-brand-blue tracking-tighter">RFDN-2026-03</p>
+              <div className="text-center sm:text-right">
+                 <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Folio Interno:</p>
+                 <p className="text-lg md:text-xl font-black text-brand-blue tracking-tighter">RFDN-2026-03</p>
               </div>
             </div>
             
-            <div className="bg-slate-50 w-full py-4 border-y-2 border-slate-100 flex justify-center items-center gap-12 mb-10">
-              <div className="text-center">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sucursal</p>
-                <p className="text-lg font-black text-brand-blue uppercase">LA VIGA</p>
+            <div className="bg-slate-50 w-full py-4 border-y-2 border-slate-100 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-12 mb-8 md:mb-10 text-center">
+              <div>
+                <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sucursal</p>
+                <p className="text-base md:text-lg font-black text-brand-blue uppercase">LA VIGA</p>
               </div>
-              <div className="w-px h-10 bg-slate-200"></div>
-              <div className="text-center">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipo de Reporte</p>
-                <p className="text-lg font-black text-brand-red uppercase italic">Reporte Mensual y FDN</p>
+              <div className="hidden sm:block w-px h-10 bg-slate-200"></div>
+              <div>
+                <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tipo de Reporte</p>
+                <p className="text-base md:text-lg font-black text-brand-red uppercase italic">Reporte Mensual y FDN</p>
               </div>
             </div>
 
