@@ -95,32 +95,32 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         {/* Advanced Technical Filters */}
         <div className="p-4 bg-[#001f44]/80 border-b border-[#001533]">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <h3 className="text-[10px] font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
             <Settings className="w-3 h-3 text-[#ffce00]" /> Filtros Técnicos
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Ancho</label>
-              <input type="text" placeholder="0.00" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-600" />
+              <label className="text-[9px] font-black text-slate-100 uppercase ml-1">Ancho</label>
+              <input type="text" placeholder="0.00" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-400" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Serie</label>
-              <input type="text" placeholder="0" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-600" />
+              <label className="text-[9px] font-black text-slate-100 uppercase ml-1">Serie</label>
+              <input type="text" placeholder="0" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-400" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">Rin</label>
-              <input type="text" placeholder="0.00" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-600" />
+              <label className="text-[9px] font-black text-slate-100 uppercase ml-1">Rin</label>
+              <input type="text" placeholder="0.00" className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-400" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-400 uppercase ml-1">MSPN</label>
-              <input type="text" placeholder="..." className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-600" />
+              <label className="text-[9px] font-black text-slate-100 uppercase ml-1">MSPN</label>
+              <input type="text" placeholder="..." className="w-full bg-[#001533] border border-[#003d7a] rounded-lg py-1.5 px-3 text-xs text-white focus:border-[#ffce00] focus:ring-1 focus:ring-[#ffce00] outline-none transition-all placeholder:text-slate-400" />
             </div>
           </div>
           
           <div className="mt-4 flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer group">
               <input type="checkbox" className="w-3.5 h-3.5 rounded border-[#003d7a] bg-[#001533] text-[#ffce00] focus:ring-[#ffce00]/20" />
-              <span className="text-[10px] font-bold text-slate-400 group-hover:text-amber-50 transition-colors">Solo con existencia</span>
+              <span className="text-[10px] font-black text-white group-hover:text-[#ffce00] transition-colors">Solo con existencia</span>
             </label>
             <button className="text-[10px] font-black text-[#ffce00] uppercase tracking-tighter hover:text-white transition-colors">Limpiar</button>
           </div>
