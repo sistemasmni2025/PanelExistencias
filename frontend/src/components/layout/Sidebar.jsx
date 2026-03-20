@@ -153,7 +153,7 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
               <span className="text-[10px] font-black text-white group-hover:text-[#ffce00] transition-colors">Solo con existencia</span>
             </label>
             <button 
-              onClick={() => onFilterChange({ ancho: '', serie: '', rin: '', nombre: '', marca: 'TODOS' })}
+              onClick={() => onFilterChange({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO' })}
               className="text-[10px] font-black text-[#ffce00] uppercase tracking-tighter hover:text-white transition-colors"
             >
               Limpiar

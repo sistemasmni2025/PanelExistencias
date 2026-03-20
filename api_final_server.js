@@ -15,22 +15,6 @@ const pool = mysql.createPool({
   port: 3306
 });
 
-const MARCA_MAPPING = {
-  'MICHELIN': ['09','10','11','22','75','M7','M8', '17','36','56','VT','XP'],
-  'BFGOODRICH': ['08','18','21','61', '16'],
-  'UNIROYAL': ['12','19','23','U1', '15','37','48','VR'],
-  'ASOCIADAS': ['07','20','45','46','57'],
-  'OTRAS MARCAS': ['53','60','64','66','67','68','69','CP','26','72','GC','HN','LS','A1','A2','FR','HB','SL','C2','C1', '52','59','70','GT','N1','NP','RM','SC','TP','VL','DC','CG','WL'],
-  'ROVELO': ['RO','RV'],
-  'CONTINENTAL': ['CT','CN'],
-  'FRONWAY': ['FW'],
-  'TOYO': ['TY'],
-  'LANVIGATOR': ['LV'],
-  'INDONESIA': ['08','U1'],
-  'BRIDGESTONE': ['BS'],
-  'FIRESTONE': ['FS']
-};
-
 app.post('/api/login', async (req, res) => {
   const { user, password } = req.body;
   try {
@@ -75,14 +59,34 @@ app.get('/api/existencias/search', async (req, res) => {
     // Logica de mapeo extraida de Genexus.
     // Solo se aplica si no estamos buscando un nombre directo (Busqueda Global)
     if (marca && marca !== 'TODOS' && !nombre) { 
-      const mappedGroups = MARCA_MAPPING[marca.toUpperCase()];
-      if (mappedGroups && mappedGroups.length > 0) {
-        query += " AND a.grucve IN (" + mappedGroups.map(v => "'" + v + "'").join(',') + ")";
+      const m = marca.toUpperCase();
+      if (m === 'INICIO') {
+        query += " AND g.grumar IN ('MI','BF','UN','AS')";
+      } else if (m === 'OTRAS MARCAS') {
+        query += " AND (g.grumar NOT IN ('MI','BF','UN','AS','LS','RO','SL','CT','FW','TY') OR g.grumar = 'OM')";
       } else {
-        query += " AND a.ALMNOM LIKE ?"; 
-        params.push('%' + marca + '%');
+        let gmar = '';
+        if (m === 'MICHELIN') gmar = 'MI';
+        else if (m === 'BFGOODRICH') gmar = 'BF';
+        else if (m === 'UNIROYAL') gmar = 'UN';
+        else if (m === 'ASOCIADAS') gmar = 'AS';
+        else if (m === 'ROVELO') gmar = 'RO';
+        else if (m === 'CONTINENTAL') gmar = 'CT';
+        else if (m === 'FRONWAY') gmar = 'FW';
+        else if (m === 'TOYO') gmar = 'TY';
+        
+        if (gmar) {
+          query += " AND g.grumar = ?";
+          params.push(gmar);
+        } else {
+          query += " AND a.ALMNOM LIKE ?"; 
+          params.push('%' + marca + '%');
+        }
       }
     }
+    
+    // Incondicional de Genexus al cargar listado
+    query += " AND g.gruclas IN ('A','C','M','D','G','E','B','O')";
     
     query += " GROUP BY a.almcve";
     

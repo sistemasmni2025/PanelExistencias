@@ -21,9 +21,9 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
     serie: '',
     rin: '',
     nombre: '',
-    marca: 'MICHELIN', // Default from current UI
+    marca: 'INICIO', // Default to genexus fallback
     soloConExistencias: true,
-    isGamma: true
+    isGamma: false
   });
 
   const fetchExistencias = async () => {
@@ -213,7 +213,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                     </span>
                     <XCircle 
                       className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" 
-                      onClick={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'MICHELIN', soloConExistencias: true })}
+                      onClick={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: true })}
                     />
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
