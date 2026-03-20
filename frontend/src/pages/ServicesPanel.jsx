@@ -26,6 +26,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
     isGamma: false
   });
 
+  const [lastSync, setLastSync] = useState('--:--');
+
   const fetchExistencias = async () => {
     setLoading(true);
     try {
@@ -78,6 +80,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
       });
 
       setProducts(mappedProducts);
+      setLastSync(new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase());
     } catch (error) {
       console.error('Error fetching inventory:', error);
     } finally {
@@ -217,7 +220,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                     />
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
-                    Sincronización Cloud: 10:30 AM
+                    Sincronización: {lastSync}
                   </span>
                 </div>
               </div>

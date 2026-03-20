@@ -87,96 +87,96 @@ const ProductRow = ({ product }) => {
       </div>
 
       {/* Col 4: Complex Commercial Details & Quantity Control */}
-      <div className="w-full lg:col-span-4 flex flex-col sm:flex-row lg:flex-row items-stretch gap-3 lg:h-[84px] pt-2 lg:pt-0">
-        <div className="flex-1 flex flex-col gap-2">
+      <div className="w-full lg:col-span-4 flex flex-col gap-2 pt-2 lg:pt-0">
+        <div className="flex flex-col gap-2">
 
           {/* Fila 1: Precios Base */}
-          <div className="flex-1 flex justify-between items-center bg-white border border-slate-200 px-2 lg:px-3 py-2 lg:py-0 rounded-xl shadow-sm overflow-x-auto lg:overflow-visible custom-scrollbar hide-scrollbar-mobile">
+          <div className="flex justify-between items-center bg-white border border-slate-200 px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl shadow-sm overflow-x-auto lg:overflow-visible custom-scrollbar hide-scrollbar-mobile">
             <div className="flex flex-col items-center min-w-[50px] lg:min-w-0">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">N. Parte</span>
-              <span className="text-[9px] lg:text-[10px] font-black text-slate-800">{product.mspn}</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">N. Parte</span>
+              <span className="text-[11px] lg:text-[13px] font-black text-slate-800">{product.mspn}</span>
             </div>
-            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="w-px h-8 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
             <div className="flex flex-col items-center min-w-[50px] lg:min-w-0">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">P. Lista</span>
-              <span className="text-[9px] lg:text-[10px] font-black text-slate-800">${product.priceList.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">P. Lista</span>
+              <span className="text-[11px] lg:text-[13px] font-black text-slate-800">${product.priceList.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
-            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="w-px h-8 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
             <div className="flex flex-col items-center min-w-[30px] lg:min-w-0">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Desc</span>
-              <span className="text-[9px] lg:text-[10px] font-black text-brand-red">{product.discountPercent}%</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Desc</span>
+              <span className="text-[11px] lg:text-[13px] font-black text-brand-red">{product.discountPercent}%</span>
             </div>
-            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="w-px h-8 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
             <div className="flex flex-col items-center min-w-[30px] lg:min-w-0">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Promo</span>
-              <span className="text-[9px] lg:text-[10px] font-black text-brand-red">{product.promotion}%</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Promo</span>
+              <span className="text-[11px] lg:text-[13px] font-black text-brand-red">{product.promotion}%</span>
             </div>
-            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="w-px h-8 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
             <div className="flex flex-col items-center min-w-[30px] lg:min-w-0">
-              <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">%NC</span>
-              <span className="text-[9px] lg:text-[10px] font-black text-amber-500">{product.ncPercent}%</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">%NC</span>
+              <span className="text-[11px] lg:text-[13px] font-black text-amber-500">{product.ncPercent}%</span>
             </div>
-            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="w-px h-8 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
             <div className="flex flex-col items-center min-w-[50px] lg:min-w-0">
-              <span className="text-[7px] font-black text-brand-red uppercase tracking-wider mb-0.5" title="Precio Facturado">Facturado</span>
-              <span className="text-[9px] lg:text-[10px] font-bold text-slate-800">${product.precioFacturado ? product.precioFacturado.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</span>
+              <span className="text-[8px] lg:text-[9px] font-black text-brand-red uppercase tracking-wider mb-0.5" title="Precio Facturado">Facturado</span>
+              <span className="text-[11px] lg:text-[13px] font-bold text-slate-800">${product.precioFacturado ? product.precioFacturado.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</span>
             </div>
           </div>
 
           {/* Fila 2: Detalle de Piso */}
-          <div className="flex-1 flex justify-between items-center bg-[#003d7a] border border-[#002b5e] px-2 lg:px-3 py-2 lg:py-0 rounded-xl shadow-lg relative overflow-hidden overflow-x-auto lg:overflow-hidden hide-scrollbar-mobile">
+          <div className="flex justify-between items-center bg-[#003d7a] border border-[#002b5e] px-3 lg:px-4 py-2.5 lg:py-2 rounded-xl shadow-lg relative overflow-hidden overflow-x-auto lg:overflow-hidden hide-scrollbar-mobile">
             <div className="absolute top-0 right-0 w-16 h-16 bg-[#ffce00]/10 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
 
             <div className="flex flex-col items-center z-10 min-w-[40px] lg:min-w-0">
-              <span className="text-[6px] lg:text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Desc. Piso</span>
-              <span className="text-[9px] lg:text-[10px] font-bold text-white">{product.piso.desc}%</span>
+              <span className="text-[7px] lg:text-[8px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Desc. Piso</span>
+              <span className="text-[10px] lg:text-[11px] font-bold text-white">{product.piso.desc}%</span>
             </div>
             <div className="flex flex-col items-center z-10 min-w-[40px] lg:min-w-0">
-              <span className="text-[6px] lg:text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Promo P.</span>
-              <span className="text-[9px] lg:text-[10px] font-bold text-white">{product.piso.promo || '0.00'}%</span>
+              <span className="text-[7px] lg:text-[8px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Promo P.</span>
+              <span className="text-[10px] lg:text-[11px] font-bold text-white">{product.piso.promo || '0.00'}%</span>
             </div>
             <div className="flex flex-col items-center z-10 min-w-[50px] lg:min-w-0">
-              <span className="text-[6px] lg:text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Venta P.</span>
-              <span className="text-[9px] lg:text-[10px] font-bold text-white">${product.piso.venta.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[7px] lg:text-[8px] font-black text-blue-300 uppercase tracking-wider mb-0.5">Venta P.</span>
+              <span className="text-[10px] lg:text-[11px] font-bold text-white">${product.piso.venta.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="flex flex-col items-center z-10 min-w-[50px] lg:min-w-0">
-              <span className="text-[6px] lg:text-[7px] font-black text-blue-300 uppercase tracking-wider mb-0.5">IVA P.</span>
-              <span className="text-[9px] lg:text-[10px] font-bold text-white">${product.piso.iva.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span className="text-[7px] lg:text-[8px] font-black text-blue-300 uppercase tracking-wider mb-0.5">IVA P.</span>
+              <span className="text-[10px] lg:text-[11px] font-bold text-white">${product.piso.iva.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
-            <div className="flex flex-col items-center ml-2 pl-2 lg:pl-3 border-l border-[#2e3b52] z-10 min-w-[60px] lg:min-w-0">
-              <span className="text-[6px] lg:text-[7px] font-black text-brand-red uppercase tracking-wider mb-0.5">P. Neto</span>
-              <span className="text-[11px] lg:text-[12px] font-black text-green-400">${product.piso.neto.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            <div className="flex flex-col items-center ml-2 pl-4 border-l-2 border-white/20 z-10 min-w-[70px] lg:min-w-0">
+              <span className="text-[8px] lg:text-[9px] font-black text-brand-red uppercase tracking-wider mb-0.5">P. Neto (Total)</span>
+              <span className="text-[14px] lg:text-[18px] font-black text-green-400 drop-shadow-sm">${product.piso.neto.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
-        </div>
 
-        {/* Quantity Selector & Action */}
-        <div className="flex sm:flex-col lg:flex-col gap-2 shrink-0 w-full sm:w-[100px] lg:w-[100px] mt-2 sm:mt-0">
-          <div className="flex-1 flex items-center justify-between bg-slate-100 px-1 py-1 lg:py-0 rounded-xl border border-slate-200 shadow-inner">
-            <button
-              onClick={handleDecrement}
-              className="p-2 lg:p-1 hover:bg-white hover:text-brand-red rounded-lg transition-all active:scale-90 text-slate-400 bg-transparent"
-            >
-              <Minus className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
-            </button>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-full text-center bg-transparent border-none text-sm lg:text-[12px] font-black text-slate-800 p-0 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            />
-            <button
-              onClick={handleIncrement}
-              className="p-2 lg:p-1 hover:bg-white hover:text-brand-blue rounded-lg transition-all active:scale-90 text-slate-400 bg-transparent"
-            >
-              <Plus className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+          {/* Fila 3: Controles */}
+          <div className="flex items-center justify-end gap-3 mt-1">
+            <div className="flex items-center justify-between bg-slate-100 px-1 py-1 rounded-xl border border-slate-200 shadow-inner w-[120px]">
+              <button
+                onClick={handleDecrement}
+                className="p-2 lg:p-1.5 hover:bg-white hover:text-brand-red rounded-lg transition-all active:scale-90 text-slate-500 bg-transparent"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full text-center bg-transparent border-none text-[14px] font-black text-slate-800 p-0 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                onClick={handleIncrement}
+                className="p-2 lg:p-1.5 hover:bg-white hover:text-brand-blue rounded-lg transition-all active:scale-90 text-slate-500 bg-transparent"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button className="flex items-center justify-center bg-[#ffce00] text-[#002b5e] px-6 py-2.5 rounded-xl hover:bg-[#e6ba00] hover:shadow-lg hover:shadow-[#ffce00]/30 transition-all active:scale-95 group/btn border border-[#e6ba00]">
+              <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform mr-2" />
+              <span className="text-[11px] font-black uppercase tracking-wider">Añadir al Carrito</span>
             </button>
           </div>
-
-          <button className="flex-1 flex items-center justify-center bg-[#ffce00] text-[#002b5e] py-3 lg:py-0 rounded-xl hover:bg-[#e6ba00] hover:shadow-xl hover:shadow-[#ffce00]/40 transition-all active:scale-95 group/btn border border-[#e6ba00]">
-            <ShoppingCart className="w-5 h-5 lg:w-4 lg:h-4 group-hover/btn:scale-110 transition-transform" />
-            <span className="ml-2 text-xs font-black uppercase tracking-wider block sm:hidden">Añadir</span>
-          </button>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ const DataGrid = ({ products: externalProducts }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const gridRef = useRef(null);
-  
+
   const totalPages = Math.max(1, Math.ceil(products.length / itemsPerPage));
 
   useEffect(() => {
@@ -229,7 +229,7 @@ const DataGrid = ({ products: externalProducts }) => {
         <div className="bg-slate-50 px-8 py-5 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-[12px] font-bold text-slate-500">
           <div>Página {currentPage} de {totalPages} <span className="font-normal text-[10px] ml-2 tracking-widest uppercase">({products.length} resultados)</span></div>
           <div className="flex gap-1.5 items-center">
-            <button 
+            <button
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
               className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
@@ -237,7 +237,7 @@ const DataGrid = ({ products: externalProducts }) => {
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
@@ -245,8 +245,8 @@ const DataGrid = ({ products: externalProducts }) => {
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
@@ -254,7 +254,7 @@ const DataGrid = ({ products: externalProducts }) => {
             >
               <ChevronRight className="w-4 h-4" />
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
               className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
