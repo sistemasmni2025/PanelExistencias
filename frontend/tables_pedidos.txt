@@ -1,0 +1,54 @@
+
+=== pedido ===
+PedidoId (bigint(20))
+PedidoFecha (date)
+almcve (char(7))
+PedidoCantidad (decimal(11,2))
+=== pedidodetalle (No existe) ===
+
+=== venta ===
+VentaId (int(11))
+VentaFecha (date)
+VentaStatus (char(1))
+VentaOrden (int(11))
+UsuarioLogin (char(10))
+VentaTipo (char(1))
+VentaStatusTipo (tinyint(1))
+VentaObservaciones (char(150))
+VentaIdC (char(10))
+VentaSerie (char(2))
+VentaFactura (bigint(20))
+VentaStatusInterno (char(1))
+VentaHoraSolicitud (datetime)
+VentaHoraFactura (datetime)
+VentaHoraAlmacen (datetime)
+VentaHoraEntrega (datetime)
+VentaHoraRecepcion (datetime)
+VentaHoraTransito (datetime)
+VentaRuta (char(1))
+VentaVehiculo (char(1))
+VentaObservacion (text)
+VentaUsuarioLogin (char(10))
+UsuarioMultillantas (int(11))
+VentaRecibio (char(50))
+=== ventadetalle ===
+VentaId (int(11))
+almcve (char(7))
+VentaDetalleIva (char(1))
+VentaDetalleCan (smallint(6))
+VentaDetallePV (decimal(11,2))
+VentaDetalleMFPCos (decimal(11,2))
+VentaDetalleOriginal (bigint(20))
+VentaDetallemfdescncp (decimal(11,2))
+=== cotizaciondetalle ===
+CotizacionId (int(11))
+CotizacionDetalleClave (char(7))
+CotizacionDetalleConcepto (char(35))
+CotizacionDetalleCantidad (smallint(6))
+CotizacionDetallePrecio (decimal(11,2))
+CotizacionDetalleJustificacion (char(50))
+CotizacionDetalleTipo (char(1))
+CotizacionDetalleIva (char(1))
+
+=== TODAS LAS TABLAS ===
+almcat, almcvehis, almgru, almrestalmres, artprom, artprom1, artprom2, artprom3, artprom7, asesor, campana, campanacampanacategorias, campanacampanacliente, campanagrupo, catalogoclase, catalogomarca, catcateg, catcli, categdes, categoria, cliente, clientevehiculo, consultaasociadosdetalle, cotizacion, cotizaciondetalle, diseno, empresa, encuesta, encuestadetalle, encuestatest, encuestatestdetalle, invnorel, invnoreldet, invnorelexc, mensajesinternos, modelo, ordenservicio, ordenserviciocheck, ordenserviciodetalle, ordenserviciofoto, ordenservicioproceso, ordenventa, ordenventaproducto, parametro, parametroftp, pedido, perfil, pregunta, primacre, primafdn, primavol, primavoldetalle, promocion, promociondetalle, promocionexcepcion, promodesc, refaccion, refacciondetalle, satprodyserv, servicio, serviciodetalle, sucursal, sucursalarticulo, sucursaldias, tallser, test, trnwhsi, um, usuario, usuariobitacora, usuariocontacto, usuariogasto, usuariopregunta, usuarioprimacre, usuariotest, usuariousuarioregistrofactura, usuarioventamanual, venta, ventadetalle, ventascaidas, ventasurtimiento

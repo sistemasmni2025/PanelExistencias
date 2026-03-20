@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, XCircle, Download, ShoppingCart } from 'lucide-react';
 
-const ServicesHeader = ({ onCartClick }) => {
+const ServicesHeader = ({ onCartClick, searchTerm, onSearchChange }) => {
   return (
     <div className="py-2 px-4 sm:px-6 bg-white">
       
@@ -16,6 +16,8 @@ const ServicesHeader = ({ onCartClick }) => {
             type="text" 
             placeholder="Buscar por descripción, marca o código..." 
             className="block w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-brand-blue/10 focus:border-brand-blue transition-all text-sm font-medium shadow-sm hover:bg-slate-100/50"
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 

@@ -4,14 +4,15 @@ import DashboardLayout from './layouts/DashboardLayout';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
-  // Simulated login flow
-  const handleLogin = (e) => {
-    e?.preventDefault();
+  const handleLogin = (userData) => {
+    setUser(userData);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    setUser(null);
     setIsAuthenticated(false);
   };
 
@@ -20,7 +21,7 @@ function App() {
       {!isAuthenticated ? (
         <Login onLogin={handleLogin} />
       ) : (
-        <DashboardLayout onLogout={handleLogout} />
+        <DashboardLayout onLogout={handleLogout} user={user} />
       )}
     </div>
   );

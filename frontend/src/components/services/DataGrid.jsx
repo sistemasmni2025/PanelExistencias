@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ChevronRight, ShoppingCart, PlusCircle, FileSpreadsheet, Minus, Plus } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft, ShoppingCart, PlusCircle, FileSpreadsheet, Minus, Plus } from 'lucide-react';
 
 const ALL_BRANCHES = [
   'QRO', 'CEL', 'SLP', 'AGS', 'LEO',
@@ -116,6 +116,11 @@ const ProductRow = ({ product }) => {
               <span className="text-[7px] font-black text-slate-400 uppercase tracking-wider mb-0.5">%NC</span>
               <span className="text-[9px] lg:text-[10px] font-black text-amber-500">{product.ncPercent}%</span>
             </div>
+            <div className="w-px h-6 bg-slate-100 mx-1 lg:mx-0 shrink-0"></div>
+            <div className="flex flex-col items-center min-w-[50px] lg:min-w-0">
+              <span className="text-[7px] font-black text-brand-red uppercase tracking-wider mb-0.5" title="Precio Facturado">Facturado</span>
+              <span className="text-[9px] lg:text-[10px] font-bold text-slate-800">${product.precioFacturado ? product.precioFacturado.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</span>
+            </div>
           </div>
 
           {/* Fila 2: Detalle de Piso */}
@@ -179,105 +184,28 @@ const ProductRow = ({ product }) => {
   );
 };
 
-const DataGrid = () => {
-  // Enriched Mock data with 10 products
-  const products = useMemo(() => [
-    {
-      id: 1, g: 'G', clave: 'AAU-163', statusDetail: 'Fuera de Gamma',
-      description: '205/65R15 94H TIGAR HIGH PERF 4001',
-      mspn: '17418', brand: 'Tigar High Performance', stock: 154,
-      priceList: 1175.00, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 1022.25, iva: 163.56, neto: 1185.81 },
-      branches: [
-        { code: 'QRO', stock: 12 }, { code: 'CEL', stock: 8 }, { code: 'SLP', stock: 45 },
-        { code: 'AGS', stock: 2 }, { code: 'LEO', stock: 15 }, { code: 'IRA', stock: 0 },
-        { code: 'REN', stock: 30 }, { code: 'GDL', stock: 10 }, { code: 'SIL', stock: 5 },
-        { code: 'IRC', stock: 12 }, { code: 'LIC', stock: 0 }, { code: 'BCE', stock: 7 },
-        { code: 'TLA', stock: 3 }, { code: 'WEB', stock: 5 }, { code: 'ALT', stock: 0 },
-        { code: 'BQRO', stock: 0 }, { code: 'BJYA', stock: 0 }, { code: 'VIGA', stock: 0 },
-        { code: 'BALT', stock: 0 }, { code: 'SJR', stock: 0 }
-      ]
-    },
-    {
-      id: 2, g: 'G', clave: 'AAU-165', statusDetail: 'Fuera de Gamma',
-      description: '195/70R14 91H TIGAR TOURING 3001',
-      mspn: '82814', brand: 'Tigar Performance', stock: 42,
-      priceList: 1019.00, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 886.53, iva: 141.84, neto: 1028.37 },
-      branches: [
-        { code: 'QRO', stock: 5 }, { code: 'CEL', stock: 0 }, { code: 'SLP', stock: 10 },
-        { code: 'AGS', stock: 0 }, { code: 'LEO', stock: 2 }, { code: 'IRA', stock: 25 },
-        { code: 'BQRO', stock: 0 }, { code: 'BJYA', stock: 0 }, { code: 'VIGA', stock: 0 }
-      ]
-    },
-    {
-      id: 3, g: 'G', clave: 'AAU-170', statusDetail: 'Fuera de Gamma',
-      description: '215/60R15 94T TIGAR HIGH PERF TL',
-      mspn: '42222', brand: 'Tigar High Performance', stock: 8,
-      priceList: 1332.00, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 1158.84, iva: 185.41, neto: 1344.25 },
-      branches: [{ code: 'SLP', stock: 3 }, { code: 'QRO', stock: 5 }]
-    },
-    {
-      id: 4, g: 'G', clave: 'AAU-173', statusDetail: 'Fuera de Gamma',
-      description: '205/65R16 95H TIGAR HIG PERF TL',
-      mspn: '34458', brand: 'Tigar High Performance', stock: 1,
-      priceList: 1321.00, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 1149.27, iva: 183.88, neto: 1333.15 },
-      branches: [{ code: 'IRC', stock: 1 }]
-    },
-    {
-      id: 5, g: 'G', clave: 'AAU-184', statusDetail: 'Fuera de Gamma',
-      description: '235/60R16 100H TIGAR HIGH PERF',
-      mspn: '75815', brand: 'Tigar High Performance', stock: 1,
-      priceList: 1445.00, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 1257.15, iva: 201.14, neto: 1458.29 },
-      branches: [{ code: 'LIC', stock: 1 }]
-    },
-    {
-      id: 6, g: 'G', clave: 'AAU-226', statusDetail: 'Fuera de Gamma',
-      description: '195/70R14 TAURUS TOURING 3001 91H',
-      mspn: 'AAU-226', brand: 'Taurus Touring', stock: 1,
-      priceList: 989.35, discountPercent: 23.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 13.00, venta: 860.73, iva: 137.72, neto: 998.45 },
-      branches: [{ code: 'LIC', stock: 1 }]
-    },
-    {
-      id: 7, g: 'F', clave: 'BAU-242', statusDetail: 'Fuera de Gamma',
-      description: '215/50R16 TRACTION T/A 89V PN',
-      mspn: '47261', brand: 'BFGoodrich Traction', stock: 1,
-      priceList: 2906.00, discountPercent: 25.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 25.00, venta: 2179.50, iva: 348.72, neto: 2528.22 },
-      branches: [{ code: 'QRO', stock: 1 }]
-    },
-    {
-      id: 8, g: 'F', clave: 'BAU-256', statusDetail: 'Fuera de Gamma',
-      description: 'P155/80R15 RADIAL T/A 83S LRD',
-      mspn: '06462', brand: 'BFGoodrich Radial', stock: 1,
-      priceList: 2660.00, discountPercent: 25.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 25.00, venta: 1995.00, iva: 319.20, neto: 2314.20 },
-      branches: [{ code: 'AGS', stock: 1 }]
-    },
-    {
-      id: 9, g: 'F', clave: 'BAU-304', statusDetail: 'Fuera de Gamma',
-      description: '285/30ZR20 G-FORCE TA KDW 99Y',
-      mspn: '93701', brand: 'BFGoodrich G-Force', stock: 1,
-      priceList: 8920.00, discountPercent: 25.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 25.00, venta: 6690.00, iva: 1070.40, neto: 7760.40 },
-      branches: [{ code: 'LIC', stock: 1 }]
-    },
-    {
-      id: 10, g: 'F', clave: 'BAU-331', statusDetail: 'Fuera de Gamma',
-      description: '255/35ZR20 G-FORCE T/A KDW 93Y',
-      mspn: '49407', brand: 'BFGoodrich G-Force', stock: 1,
-      priceList: 7174.00, discountPercent: 25.00, promotion: 0.00, ncPercent: 0.00,
-      piso: { desc: 25.00, venta: 5380.50, iva: 860.88, neto: 6241.38 },
-      branches: [{ code: 'LIC', stock: 1 }]
+const DataGrid = ({ products: externalProducts }) => {
+  const products = externalProducts || [];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const gridRef = useRef(null);
+  
+  const totalPages = Math.max(1, Math.ceil(products.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [products]);
+
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  ], []);
+  }, [currentPage]);
+
+  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="relative animate-slide-up">
+    <div ref={gridRef} className="relative animate-slide-up">
       {/* Table Header - Cascading Sticky (Fixed to top of Page Scroll) - Hidden on Mobile */}
       <div className="hidden lg:block sticky top-0 z-[60] -mx-px">
         <div className="bg-[#003d7a] border-b border-[#ffce00] shadow-xl rounded-t-[2.5rem] px-8 py-5 relative overflow-hidden">
@@ -293,16 +221,47 @@ const DataGrid = () => {
 
       {/* Table Body - Stacked Cards on Mobile, Horizontal Rows on Desktop */}
       <div className="bg-white border lg:border-t-0 border-slate-100 rounded-[2rem] lg:rounded-t-none lg:rounded-b-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden divide-y divide-slate-100/50 mt-4 lg:mt-0">
-        {products.map((product) => (
+        {paginatedProducts.map((product) => (
           <ProductRow key={product.id} product={product} />
         ))}
 
-        {/* Footer Info - Now Part of the Scrolled Card at the bottom */}
-        <div className="bg-slate-50 px-8 py-5 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          <div>Mostrando <span className="text-slate-800 font-black">10</span> de <span className="text-slate-800 font-black">1240</span> resultados</div>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors">Anterior</button>
-            <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors">Siguiente</button>
+        {/* Footer Info - Pagination Controls */}
+        <div className="bg-slate-50 px-8 py-5 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-[12px] font-bold text-slate-500">
+          <div>Página {currentPage} de {totalPages} <span className="font-normal text-[10px] ml-2 tracking-widest uppercase">({products.length} resultados)</span></div>
+          <div className="flex gap-1.5 items-center">
+            <button 
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
+              title="Primera página"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
+              title="Anterior"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
+              title="Siguiente"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className={`p-2 border rounded-lg transition-colors shadow-sm ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'bg-white border-slate-300 hover:bg-slate-50 hover:text-[#003d7a]'}`}
+              title="Última página"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

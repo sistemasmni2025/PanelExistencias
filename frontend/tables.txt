@@ -1,0 +1,22 @@
+=== Cotizacion ===
+CotizacionId (int(11))
+CotizacionFecha (date)
+nclicve (smallint(6))
+nclinom (char(35))
+ncategcve (smallint(6))
+nclidcred (smallint(6))
+nclimail (char(50))
+UsuarioLogin (char(10))
+
+=== CotizacionDetalle ===
+CotizacionId (int(11))
+CotizacionDetalleClave (char(7))
+CotizacionDetalleConcepto (char(35))
+CotizacionDetalleCantidad (smallint(6))
+CotizacionDetallePrecio (decimal(11,2))
+CotizacionDetalleJustificacion (char(50))
+CotizacionDetalleTipo (char(1))
+CotizacionDetalleIva (char(1))
+
+=== Otras tablas ===
+cotizacion, cotizaciondetalle

@@ -1,16 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/layout/Sidebar';
 import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
 import PrimasFdnPanel from '../components/services/PrimasFdnPanel';
 import CartDrawer from '../components/cart/CartDrawer';
 import PromoBanner from '../components/layout/PromoBanner';
-import { Menu, XCircle, Home, LogOut, FileText, Truck } from 'lucide-react';
+import { Menu, XCircle, Home, LogOut, FileText, Truck, Loader2 } from 'lucide-react';
+import API_BASE_URL from '../services/apiConfig';
 
-const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
+const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('existencias');
+  
+  // State for inventory filtering
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    ancho: '',
+    serie: '',
+    rin: '',
+    nombre: '',
+    marca: 'MICHELIN', // Default from current UI
+    soloConExistencias: true,
+    isGamma: true
+  });
+
+  const fetchExistencias = async () => {
+    setLoading(true);
+    try {
+      const queryParams = new URLSearchParams();
+      if (filters.ancho) queryParams.append('ancho', filters.ancho);
+      if (filters.serie) queryParams.append('serie', filters.serie);
+      if (filters.rin) queryParams.append('rin', filters.rin);
+      if (filters.nombre) queryParams.append('nombre', filters.nombre);
+      if (filters.marca && filters.marca !== 'TODOS') queryParams.append('marca', filters.marca);
+      if (filters.soloConExistencias) queryParams.append('conExistencias', 'true');
+      if (filters.isGamma) queryParams.append('isGamma', 'true');
+
+      const response = await fetch(`${API_BASE_URL}/existencias/search?${queryParams.toString()}`);
+      const rawData = await response.json();
+      
+      const mappedProducts = rawData.map((p, index) => {
+        const branchKeys = Object.keys(p).filter(k => !['Grupo','Descripcion','Clave','Status','NParte','PLista','Descuento','Promocion','PrecioFacturado', 'gruclas', 'DescPiso', 'PVentaPiso', 'IVA_Flag'].includes(k));
+        const totalStock = branchKeys.reduce((acc, code) => acc + Math.max(0, Number(p[code]) || 0), 0);
+        const branches = branchKeys.map(code => ({ code, stock: Math.max(0, Number(p[code]) || 0) }));
+
+        // Transform backend fields to match ProductRow structure exactly
+        const pFacturado = Number(p.PVentaPiso) || 0;
+        
+        // Lógica Gamma: el status (almstat) determina si es Gamma ('G')
+        const isGamma = p.Status === 'G';
+
+        return {
+          id: p.Clave || index,
+          g: isGamma ? 'G' : 'F',
+          clave: p.Clave || '-',
+          statusDetail: isGamma ? 'Gamma' : (p.Status === 'F' ? 'Fuera de Gamma' : (p.Status || 'Activo')),
+          description: p.Descripcion || 'Sin Descripción',
+          mspn: p.NParte || '-',
+          brand: p.Grupo || 'Multi',
+          stock: totalStock,
+          priceList: Number(p.PLista) || 0,
+          discountPercent: Number(p.Descuento) || 0,
+          promotion: Number(p.Promocion) || 0,
+          ncPercent: 0,
+          precioFacturado: Number(p.PrecioFacturado) || 0,
+          piso: {
+            desc: Number(p.DescPiso) || 0,
+            promo: 0,
+            venta: pFacturado,
+            iva: p.IVA_Flag === 'S' ? (pFacturado * 0.16) : 0,
+            neto: p.IVA_Flag === 'S' ? (pFacturado * 1.16) : pFacturado
+          },
+          branches: branches
+        };
+      });
+
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'existencias') {
+      fetchExistencias();
+    }
+  }, [filters, activeTab]);
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
 
 
   return (
@@ -20,7 +103,12 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none -z-0"></div>
 
       {/* Sidebar - Now with mobile support */}
-      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        setIsOpen={setSidebarOpen} 
+        filters={filters} 
+        onFilterChange={handleFilterChange} 
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
@@ -85,7 +173,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
             <div className="flex items-center gap-4">
               <div className="hidden md:block text-right">
                 <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Bienvenido(a)</p>
-                <p className="text-[10px] font-bold text-white uppercase tracking-tight leading-none">Administrador</p>
+                <p className="text-[10px] font-bold text-white uppercase tracking-tight leading-none">{user?.UsuarioNombre || 'Consultor'}</p>
               </div>
               <button
                 onClick={onLogout}
@@ -107,7 +195,11 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
 
               {/* Layer 2: Global Search / Actions Header - Border removed */}
               <div className="">
-                <ServicesHeader onCartClick={() => setCartOpen(true)} />
+                <ServicesHeader 
+                  onCartClick={() => setCartOpen(true)} 
+                  searchTerm={filters.nombre}
+                  onSearchChange={(val) => handleFilterChange({ nombre: val })}
+                />
               </div>
 
               {/* Layer 3: Filter Indicator Section - No Background/Border, just floating info */}
@@ -116,9 +208,13 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
                   <div className="flex items-center gap-3 px-1">
                     <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      Resultados Filtrados: <span className="text-brand-red">MICHELIN</span>
+                      Resultados Filtrados: <span className="text-brand-red">{filters.marca || 'TODOS'}</span>
+                      {filters.ancho && <span className="ml-2 italic text-slate-400">/ A: {filters.ancho}</span>}
                     </span>
-                    <XCircle className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" />
+                    <XCircle 
+                      className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" 
+                      onClick={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'MICHELIN', soloConExistencias: true })}
+                    />
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
                     Sincronización Cloud: 10:30 AM
@@ -130,7 +226,14 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout }) => {
             {/* Scrollable Data Area - Single Scroll System */}
             <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
               <div className="w-full mx-auto animate-slide-up p-4 sm:p-6 md:p-8 pt-4">
-                <DataGrid />
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="w-10 h-10 text-brand-red animate-spin" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Consultando Inventario Real...</p>
+                  </div>
+                ) : (
+                  <DataGrid products={products} />
+                )}
               </div>
             </div>
           </>

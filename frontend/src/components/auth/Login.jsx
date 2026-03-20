@@ -1,11 +1,44 @@
 import React, { useState } from 'react';
-import { User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Lock, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import logoImg from '../../../assets/logo_nieto.png';
+import API_BASE_URL from '../../services/apiConfig';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [consent, setConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!consent) return;
+    
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user: username, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        onLogin(data.user);
+      } else {
+        setError(data.message || 'Error de autenticación');
+      }
+    } catch (err) {
+      setError('No se pudo conectar con el servidor. Verifica que la API esté corriendo.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50">
@@ -37,7 +70,12 @@ const Login = ({ onLogin }) => {
 
           {/* Form */}
           <div className="px-6 sm:px-10 pb-8 sm:pb-10">
-            <form onSubmit={onLogin} className="space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-xs font-bold rounded-lg animate-shake">
+                  {error}
+                </div>
+              )}
 
               <div className="space-y-3 sm:space-y-4">
                 {/* Username Input */}
@@ -94,17 +132,23 @@ const Login = ({ onLogin }) => {
               <div>
                 <button
                   type="submit"
-                  disabled={!consent}
+                  disabled={!consent || loading}
                   className={`w-full flex justify-center items-center gap-2 py-3 sm:py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white transition-all duration-300
-                    ${consent
+                    ${consent && !loading
                       ? 'bg-brand-red hover:bg-red-800 hover:shadow-brand-red/40 hover:-translate-y-0.5 active:translate-y-0'
                       : 'bg-slate-300 cursor-not-allowed shadow-none'
                     }
                   `}
                 >
-                  <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 opacity-90" />
-                  Acceso
-                  <ArrowRight className={`h-4 w-4 transition-transform duration-300 ${consent ? 'opacity-100 translate-x-1' : 'opacity-50'}`} />
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 opacity-90" />
+                      Acceso
+                      <ArrowRight className={`h-4 w-4 transition-transform duration-300 ${consent ? 'opacity-100 translate-x-1' : 'opacity-50'}`} />
+                    </>
+                  )}
                 </button>
               </div>
             </form>
