@@ -51,7 +51,7 @@ const PromoBanner = () => {
                 <span className="text-[10px] font-black bg-[#ffce00] text-[#003d7a] px-2 py-0.5 rounded uppercase tracking-tighter">Premium</span>
               </div>
               <h2 className="text-sm sm:text-lg lg:text-2xl font-black text-white uppercase tracking-tighter leading-none">
-                DRP  <span className="text-[#ffce00] italic">Servicios Automotrices</span>
+                Multillantas <span className="text-[#ffce00] italic">Nieto</span>
               </h2>
             </div>
 

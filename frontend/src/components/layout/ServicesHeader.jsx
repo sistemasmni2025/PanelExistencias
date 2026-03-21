@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, XCircle, Download, ShoppingCart } from 'lucide-react';
 
-const ServicesHeader = ({ onCartClick, searchTerm, onSearchChange }) => {
+const ServicesHeader = ({ onCartClick, searchTerm, onSearchChange, cartCount = 0, cartTotal = 0 }) => {
   return (
     <div className="py-2 px-4 sm:px-6 bg-white">
       
@@ -33,12 +33,12 @@ const ServicesHeader = ({ onCartClick, searchTerm, onSearchChange }) => {
                 <ShoppingCart className="w-5 h-5" />
               </div>
               <span className="absolute -top-1.5 -right-1.5 bg-slate-900 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
-                0
+                {cartCount}
               </span>
             </div>
             <div className="hidden md:block">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">Total</p>
-              <p className="text-xs font-bold text-slate-700">$0.00</p>
+              <p className="text-xs font-bold text-slate-700">${cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>

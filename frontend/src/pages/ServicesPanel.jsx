@@ -12,7 +12,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('existencias');
-  
+
   // State for inventory filtering
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,6 +27,32 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
   });
 
   const [lastSync, setLastSync] = useState('--:--');
+  const [cart, setCart] = useState([]);
+
+  const handleAddToCart = (product, quantity) => {
+    setCart(prev => {
+      const existingItem = prev.find(item => item.id === product.id);
+      if (existingItem) {
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity }];
+    });
+  };
+
+  const handleRemoveFromCart = (productId) => {
+    setCart(prev => prev.filter(item => item.id !== productId));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const cartTotal = cart.reduce((acc, item) => acc + (item.piso.neto * item.quantity), 0);
 
   const fetchExistencias = async () => {
     setLoading(true);
@@ -42,15 +68,15 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
 
       const response = await fetch(`${API_BASE_URL}/existencias/search?${queryParams.toString()}`);
       const rawData = await response.json();
-      
+
       const mappedProducts = rawData.map((p, index) => {
-        const branchKeys = Object.keys(p).filter(k => !['Grupo','Descripcion','Clave','Status','NParte','PLista','Descuento','Promocion','PrecioFacturado', 'gruclas', 'DescPiso', 'PVentaPiso', 'IVA_Flag'].includes(k));
+        const branchKeys = Object.keys(p).filter(k => !['Grupo', 'Descripcion', 'Clave', 'Status', 'NParte', 'PLista', 'Descuento', 'Promocion', 'PrecioFacturado', 'gruclas', 'DescPiso', 'PVentaPiso', 'IVA_Flag'].includes(k));
         const totalStock = branchKeys.reduce((acc, code) => acc + Math.max(0, Number(p[code]) || 0), 0);
         const branches = branchKeys.map(code => ({ code, stock: Math.max(0, Number(p[code]) || 0) }));
 
         // Transform backend fields to match ProductRow structure exactly
         const pFacturado = Number(p.PVentaPiso) || 0;
-        
+
         // Lógica Gamma: el status (almstat) determina si es Gamma ('G')
         const isGamma = p.Status === 'G';
 
@@ -106,11 +132,11 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none -z-0"></div>
 
       {/* Sidebar - Now with mobile support */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        setIsOpen={setSidebarOpen} 
-        filters={filters} 
-        onFilterChange={handleFilterChange} 
+      <Sidebar
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+        filters={filters}
+        onFilterChange={handleFilterChange}
       />
 
       {/* Main Content */}
@@ -132,13 +158,12 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
             <div className="h-4 w-px bg-slate-700 mx-2 hidden sm:block"></div>
 
             <button
-               onClick={() => setActiveTab('existencias')}
-               className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${
-                 activeTab === 'existencias' 
-                 ? 'bg-[#ffce00] text-[#003d7a]' 
-                 : 'text-slate-300 hover:text-white hover:bg-white/10'
-               }`}
-               title="Consultar Existencias"
+              onClick={() => setActiveTab('existencias')}
+              className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${activeTab === 'existencias'
+                  ? 'bg-[#ffce00] text-[#003d7a]'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`}
+              title="Consultar Existencias"
             >
               <Truck className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden md:inline transition-colors">Existencias</span>
@@ -159,11 +184,10 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
 
             <button
               onClick={() => setActiveTab(activeTab === 'primas_fdn' ? 'existencias' : 'primas_fdn')}
-              className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${
-                activeTab === 'primas_fdn' 
-                ? 'bg-[#ffce00] text-[#003d7a]' 
-                : 'text-slate-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${activeTab === 'primas_fdn'
+                  ? 'bg-[#ffce00] text-[#003d7a]'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                }`}
               title="Ver Primas y FDN"
             >
               <FileText className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -198,10 +222,12 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
 
               {/* Layer 2: Global Search / Actions Header - Border removed */}
               <div className="">
-                <ServicesHeader 
-                  onCartClick={() => setCartOpen(true)} 
+                <ServicesHeader
+                  onCartClick={() => setCartOpen(true)}
                   searchTerm={filters.nombre}
                   onSearchChange={(val) => handleFilterChange({ nombre: val })}
+                  cartCount={cartCount}
+                  cartTotal={cartTotal}
                 />
               </div>
 
@@ -214,8 +240,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                       Resultados Filtrados: <span className="text-brand-red">{filters.marca || 'TODOS'}</span>
                       {filters.ancho && <span className="ml-2 italic text-slate-400">/ A: {filters.ancho}</span>}
                     </span>
-                    <XCircle 
-                      className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors" 
+                    <XCircle
+                      className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors"
                       onClick={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: true })}
                     />
                   </div>
@@ -235,7 +261,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Consultando Inventario Real...</p>
                   </div>
                 ) : (
-                  <DataGrid products={products} />
+                  <DataGrid products={products} onAddToCart={handleAddToCart} />
                 )}
               </div>
             </div>
@@ -251,14 +277,21 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                 <FileText className="w-10 h-10 text-slate-400" />
               </div>
               <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Módulo en Desarrollo</h3>
-              <p className="text-xs text-slate-500 mt-2">Esta sección ({tabs.find(t => t.id === activeTab)?.label}) estará disponible próximamente.</p>
+              <p className="text-xs text-slate-500 mt-2">Esta sección estará disponible próximamente.</p>
             </div>
           </div>
         )}
       </main>
 
       {/* Slide-over Cart Drawer */}
-      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartDrawer
+        isOpen={cartOpen}
+        onClose={() => setCartOpen(false)}
+        cart={cart}
+        onRemove={handleRemoveFromCart}
+        onClear={handleClearCart}
+        sucursal={user?.SucursalNombre}
+      />
     </div>
   );
 };

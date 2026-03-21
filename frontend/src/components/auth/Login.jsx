@@ -158,7 +158,7 @@ const Login = ({ onLogin }) => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-slate-400">
-          <p>&copy; {new Date().getFullYear()} DRP Servicios Automotrices. Todos los derechos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Multi Llantas Nieto. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>

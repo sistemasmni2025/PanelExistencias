@@ -8,7 +8,7 @@ const ALL_BRANCHES = [
   'BQRO', 'BJYA', 'VIGA', 'BALT', 'SJR'
 ];
 
-const ProductRow = ({ product }) => {
+const ProductRow = ({ product, onAddToCart }) => {
   const [quantity, setQuantity] = useState(1);
 
   const handleIncrement = () => setQuantity(prev => prev + 1);
@@ -19,26 +19,30 @@ const ProductRow = ({ product }) => {
 
       {/* Col 1: Gamma & Branding */}
       <div className="lg:col-span-1 flex lg:flex-col items-center gap-4 lg:gap-3 w-full lg:w-auto border-b lg:border-none border-slate-100 pb-4 lg:pb-0">
-        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-sm ${product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'
+        <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-sm ${product.g === 'G' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'
           }`}>
           {product.g}
         </span>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-2">
           <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-100 uppercase tracking-tighter">
             {product.clave}
           </span>
+          <button
+            onClick={() => window.open(`http://multillantasnieto.net:8081/Existencias/Fichas/${product.clave}.pdf`, '_blank')}
+            className="p-1.5 bg-slate-100 text-slate-400 rounded-lg hover:bg-brand-blue hover:text-white transition-all shadow-sm group/pdf"
+            title="Ver Ficha Técnica"
+          >
+            <FileSpreadsheet className="w-4 h-4 group-hover/pdf:scale-110 transition-transform" />
+          </button>
         </div>
       </div>
 
       {/* Col 2: Info & Status - Optimized Layout */}
       <div className="lg:col-span-3 space-y-2 lg:space-y-3 w-full lg:w-auto border-b lg:border-none border-slate-100 pb-4 lg:pb-0">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-sm lg:text-[15px] font-black text-slate-800 leading-snug group-hover:text-brand-red transition-colors pr-2">
+          <h3 className="text-sm lg:text-[15px] font-black text-slate-800 leading-snug group-hover:text-brand-blue transition-colors pr-2">
             {product.description}
           </h3>
-          <button className="shrink-0 p-2 bg-slate-100 text-slate-400 rounded-xl hover:bg-brand-blue hover:text-white transition-all shadow-sm">
-            <FileSpreadsheet className="w-4 h-4" />
-          </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 lg:gap-3">
@@ -46,12 +50,15 @@ const ProductRow = ({ product }) => {
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">MSPN</span>
             <span className="text-[11px] font-black text-slate-800 leading-none">{product.mspn}</span>
           </span>
-          <span className="text-[9px] lg:text-[11px] font-black text-red-600 bg-red-50 px-2 lg:px-3 py-1 rounded border border-red-100 uppercase italic tracking-wide">
+          <span className={`text-[9px] lg:text-[11px] font-black px-2 lg:px-3 py-1 rounded border uppercase italic tracking-wide ${product.g === 'G'
+              ? 'text-green-600 bg-green-50 border-green-100'
+              : 'text-red-600 bg-red-50 border-red-100'
+            }`}>
             {product.statusDetail}
           </span>
           <div className="hidden lg:block h-3 w-px bg-slate-200"></div>
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            {product.brand}
+            {product.brand !== 'Multi' ? product.brand : ''}
           </span>
         </div>
       </div>
@@ -172,7 +179,10 @@ const ProductRow = ({ product }) => {
               </button>
             </div>
 
-            <button className="flex items-center justify-center bg-[#ffce00] text-[#002b5e] px-6 py-2.5 rounded-xl hover:bg-[#e6ba00] hover:shadow-lg hover:shadow-[#ffce00]/30 transition-all active:scale-95 group/btn border border-[#e6ba00]">
+            <button
+              onClick={() => onAddToCart(product, quantity)}
+              className="flex items-center justify-center bg-[#ffce00] text-[#002b5e] px-6 py-2.5 rounded-xl hover:bg-[#e6ba00] hover:shadow-lg hover:shadow-[#ffce00]/30 transition-all active:scale-95 group/btn border border-[#e6ba00]"
+            >
               <ShoppingCart className="w-5 h-5 group-hover/btn:scale-110 transition-transform mr-2" />
               <span className="text-[11px] font-black uppercase tracking-wider">Añadir al Carrito</span>
             </button>
@@ -184,7 +194,7 @@ const ProductRow = ({ product }) => {
   );
 };
 
-const DataGrid = ({ products: externalProducts }) => {
+const DataGrid = ({ products: externalProducts, onAddToCart }) => {
   const products = externalProducts || [];
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -222,7 +232,7 @@ const DataGrid = ({ products: externalProducts }) => {
       {/* Table Body - Stacked Cards on Mobile, Horizontal Rows on Desktop */}
       <div className="bg-white border lg:border-t-0 border-slate-100 rounded-[2rem] lg:rounded-t-none lg:rounded-b-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden divide-y divide-slate-100/50 mt-4 lg:mt-0">
         {paginatedProducts.map((product) => (
-          <ProductRow key={product.id} product={product} />
+          <ProductRow key={product.id} product={product} onAddToCart={onAddToCart} />
         ))}
 
         {/* Footer Info - Pagination Controls */}

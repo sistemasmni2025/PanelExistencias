@@ -27,8 +27,8 @@ app.post('/api/login', async (req, res) => {
     } else {
       res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
     }
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -36,29 +36,29 @@ app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma } = req.query;
   try {
     const [branches] = await pool.query("SELECT SucursalId, SucursalAbreviacion as sigla FROM sucursal WHERE SucursalAbreviacion IS NOT NULL");
-    
-    const branchSelects = branches.map(b => 
+
+    const branchSelects = branches.map(b =>
       "MAX(CASE WHEN s.SucursalId = " + b.SucursalId + " THEN s.almstock ELSE 0 END) AS " + b.sigla
     ).join(', ');
 
     let query = "SELECT g.grudesc as Grupo, g.gruclas as gruclas, a.ALMNOM as Descripcion, a.almcve as Clave, a.almstat as Status, a.almnpart as NParte, a.almplist as PLista, IFNULL(c6.cgdesc30, 0) as Descuento, 0.00 as Promocion, ROUND(a.almplist * (1 - IFNULL(c6.cgdesc30, 0) / 100), 2) as PrecioFacturado, IFNULL(c1.cgdesc, 0) as DescPiso, ROUND(a.almplist * (1 - IFNULL(c1.cgdesc, 0) / 100), 2) as PVentaPiso, a.almiva as IVA_Flag, " + branchSelects + " FROM almcat a LEFT JOIN almgru g ON a.grucve = g.grucve LEFT JOIN sucursalarticulo s ON a.almcve = s.almcve LEFT JOIN categdes c6 ON c6.cgcve = a.grucve AND c6.categcve = 6 LEFT JOIN categdes c1 ON c1.cgcve = a.grucve AND c1.categcve = 1 WHERE 1=1";
-    
+
     const params = [];
     if (ancho) { query += " AND a.almancho = ?"; params.push(ancho); }
     if (serie) { query += " AND a.almserie = ?"; params.push(serie); }
     if (rin) { query += " AND a.almrin = ?"; params.push(rin); }
-    if (nombre) { 
+    if (nombre) {
       // Busca tanto en el Nombre como en la Clave
-      query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)"; 
-      params.push('%' + nombre + '%', '%' + nombre + '%'); 
+      query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)";
+      params.push('%' + nombre + '%', '%' + nombre + '%');
     }
     if (isGamma === 'true') {
       query += " AND a.almstat = 'G'";
     }
-    
+
     // Logica de mapeo extraida de Genexus.
     // Solo se aplica si no estamos buscando un nombre directo (Busqueda Global)
-    if (marca && marca !== 'TODOS' && !nombre) { 
+    if (marca && marca !== 'TODOS' && !nombre) {
       const m = marca.toUpperCase();
       if (m === 'INICIO') {
         query += " AND g.grumar IN ('MI','BF','UN','AS')";
@@ -74,32 +74,32 @@ app.get('/api/existencias/search', async (req, res) => {
         else if (m === 'CONTINENTAL') gmar = 'CT';
         else if (m === 'FRONWAY') gmar = 'FW';
         else if (m === 'TOYO') gmar = 'TY';
-        
+
         if (gmar) {
           query += " AND g.grumar = ?";
           params.push(gmar);
         } else {
-          query += " AND a.ALMNOM LIKE ?"; 
+          query += " AND a.ALMNOM LIKE ?";
           params.push('%' + marca + '%');
         }
       }
     }
-    
+
     // Incondicional de Genexus al cargar listado
     query += " AND g.gruclas IN ('A','C','M','D','G','E','B','O')";
-    
+
     query += " GROUP BY a.almcve";
-    
+
     if (conExistencias === 'true') {
       query += " HAVING SUM(IFNULL(s.almstock, 0)) > 0";
     }
-    
+
     query += " ORDER BY g.grudesc, a.almcve LIMIT 2500";
 
     const [rows] = await pool.query(query, params);
     res.json(rows);
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -149,15 +149,15 @@ app.get('/api/pedidos', async (req, res) => {
     query += ' GROUP BY v.VentaId ORDER BY v.VentaId DESC LIMIT 100';
 
     const [rows] = await pool.query(query, params);
-    
+
     // Map numerical values to formatted strings for the frontend
     const formattedRows = rows.map(r => {
       const subtotal = r.subtotal_num || 0;
       const iva = r.iva_num || 0;
       const total = subtotal + iva;
-      
+
       let statusDesc = 'Desconocido';
-      switch(r.VentaStatus) {
+      switch (r.VentaStatus) {
         case 'S': statusDesc = 'Solicitada'; break;
         case 'F': statusDesc = 'Facturada'; break;
         case 'E': statusDesc = 'Entregada'; break;
@@ -170,7 +170,7 @@ app.get('/api/pedidos', async (req, res) => {
         id: r.id.toString(),
         fecha: r.fecha,
         status: statusDesc,
-        statusDoc: statusDesc, 
+        statusDoc: statusDesc,
         login: r.login,
         cliente: r.cliente,
         ordenVenta: r.ordenVenta ? 'OV-' + r.ordenVenta : '',
@@ -216,7 +216,7 @@ app.get('/api/cotizaciones/:id', async (req, res) => {
     const { id } = req.params;
     const [header] = await pool.query('SELECT * FROM Cotizacion WHERE CotizacionId = ?', [id]);
     const [details] = await pool.query('SELECT * FROM CotizacionDetalle WHERE CotizacionId = ?', [id]);
-    
+
     if (header.length > 0) {
       res.json({ ...header[0], items: details });
     } else {
@@ -232,7 +232,7 @@ app.post('/api/cotizaciones', async (req, res) => {
   const { UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail } = req.body;
   try {
     const d = new Date();
-    const fecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const fecha = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const [result] = await pool.query(
       'INSERT INTO Cotizacion (CotizacionFecha, UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [fecha, UsuarioLogin, nclicve || 0, nclinom || '', ncategcve || 1, nclidcred || 0, nclimail || '']
