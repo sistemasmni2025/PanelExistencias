@@ -22,8 +22,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
     rin: '',
     nombre: '',
     marca: 'INICIO', // Default to genexus fallback
-    soloConExistencias: true,
-    isGamma: false
+    soloConExistencias: false,
+    isGamma: true
   });
 
   const [lastSync, setLastSync] = useState('--:--');
@@ -70,15 +70,17 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
       const rawData = await response.json();
 
       const mappedProducts = rawData.map((p, index) => {
-        const branchKeys = Object.keys(p).filter(k => !['Grupo', 'Descripcion', 'Clave', 'Status', 'NParte', 'PLista', 'Descuento', 'Promocion', 'PrecioFacturado', 'gruclas', 'DescPiso', 'PVentaPiso', 'IVA_Flag'].includes(k));
+        const branchKeys = Object.keys(p).filter(k => !['Grupo', 'Descripcion', 'Clave', 'Status', 'NParte', 'PLista', 'Descuento', 'Promocion', 'PrecioFacturado', 'gruclas', 'DescPiso', 'PVentaPiso', 'IVA_Flag', 'CampanaNombre', 'CampanaPDF'].includes(k));
         const totalStock = branchKeys.reduce((acc, code) => acc + Math.max(0, Number(p[code]) || 0), 0);
         const branches = branchKeys.map(code => ({ code, stock: Math.max(0, Number(p[code]) || 0) }));
 
         // Transform backend fields to match ProductRow structure exactly
         const pFacturado = Number(p.PVentaPiso) || 0;
 
-        // Lógica Gamma: el status (almstat) determina si es Gamma ('G')
         const isGamma = p.Status === 'G';
+
+        const brandStr = String(p.Grupo || '');
+        const brandUpper = brandStr.toUpperCase();
 
         return {
           id: p.Clave || index,
@@ -88,7 +90,12 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
           description: p.Descripcion || 'Sin Descripción',
           clase: p.gruclas || '',
           mspn: p.NParte || '-',
-          brand: (p.Grupo && p.Grupo !== 'Multi') ? p.Grupo : (filters.marca && filters.marca !== 'TODOS' && filters.marca !== 'INICIO' ? filters.marca : 'Multi'),
+          brand: (p.Grupo && String(p.Grupo).toUpperCase() !== 'MULTI') ? brandStr : (
+            (brandUpper.includes('MICHELIN') || brandUpper.includes('MI')) ? 'MICHELIN' :
+            (brandUpper.includes('BFGOODRICH') || brandUpper.includes('BF')) ? 'BFGOODRICH' :
+            (brandUpper.includes('UNIROYAL') || brandUpper.includes('UN')) ? 'UNIROYAL' :
+            (brandUpper.includes('BRIDGESTONE')) ? 'BRIDGESTONE' : 'GENERICA'
+          ),
           stock: totalStock,
           priceList: Number(p.PLista) || 0,
           discountPercent: Number(p.Descuento) || 0,
@@ -102,7 +109,9 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
             iva: p.IVA_Flag === 'S' ? (pFacturado * 0.16) : 0,
             neto: p.IVA_Flag === 'S' ? (pFacturado * 1.16) : pFacturado
           },
-          branches: branches
+          branches: branches,
+          campaignName: p.CampanaNombre || null,
+          campaignPdf: p.CampanaPDF || null
         };
       });
 
@@ -161,8 +170,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
             <button
               onClick={() => setActiveTab('existencias')}
               className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${activeTab === 'existencias'
-                  ? 'bg-[#ffce00] text-[#003d7a]'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                ? 'bg-[#ffce00] text-[#003d7a]'
+                : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               title="Consultar Existencias"
             >
@@ -186,8 +195,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
             <button
               onClick={() => setActiveTab(activeTab === 'primas_fdn' ? 'existencias' : 'primas_fdn')}
               className={`p-2 rounded-xl transition-all flex items-center gap-2 group ${activeTab === 'primas_fdn'
-                  ? 'bg-[#ffce00] text-[#003d7a]'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                ? 'bg-[#ffce00] text-[#003d7a]'
+                : 'text-slate-300 hover:text-white hover:bg-white/10'
                 }`}
               title="Ver Primas y FDN"
             >
@@ -230,7 +239,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                 cartTotal={cartTotal}
                 filters={filters}
                 lastSync={lastSync}
-                onClearFilters={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: true })}
+                onClearFilters={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: false, isGamma: true })}
               />
             </div>
 

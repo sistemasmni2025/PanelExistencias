@@ -58,20 +58,8 @@ app.get('/api/existencias/search', async (req, res) => {
         IFNULL(c1.cgdesc, 0) as DescPiso, 
         ROUND(a.almplist * (1 - IFNULL(c1.cgdesc, 0) / 100), 2) as PVentaPiso, 
         a.almiva as IVA_Flag,
-        MAX(CASE 
-          WHEN (g.grumar = 'MI' OR g.grudesc LIKE '%MICHELIN%' OR a.ALMNOM LIKE '%MICHELIN%') AND cp.CampanaDescripcion LIKE '%Michelin%' THEN cp.CampanaDescripcion
-          WHEN (g.grumar = 'BF' OR g.grudesc LIKE '%BFGOODRICH%' OR a.ALMNOM LIKE '%BFGOODRICH%' OR a.ALMNOM LIKE '%KO2%' OR a.ALMNOM LIKE '%KO3%') AND cp.CampanaDescripcion LIKE '%BFGoodrich%' THEN cp.CampanaDescripcion
-          WHEN (g.grumar = 'UN' OR g.grudesc LIKE '%UNIROYAL%' OR a.ALMNOM LIKE '%UNIROYAL%') AND cp.CampanaDescripcion LIKE '%Uniroyal%' THEN cp.CampanaDescripcion
-          WHEN (g.grudesc LIKE '%BRIDGESTONE%' OR a.ALMNOM LIKE '%BRIDGESTONE%') AND cp.CampanaDescripcion LIKE '%Bridgestone%' THEN cp.CampanaDescripcion
-          ELSE NULL 
-        END) as CampanaNombre,
-        MAX(CASE 
-          WHEN (g.grumar = 'MI' OR g.grudesc LIKE '%MICHELIN%' OR a.ALMNOM LIKE '%MICHELIN%') AND cp.CampanaDescripcion LIKE '%Michelin%' THEN cp.CampanaRutaPDF
-          WHEN (g.grumar = 'BF' OR g.grudesc LIKE '%BFGOODRICH%' OR a.ALMNOM LIKE '%BFGOODRICH%' OR a.ALMNOM LIKE '%KO2%' OR a.ALMNOM LIKE '%KO3%') AND cp.CampanaDescripcion LIKE '%BFGoodrich%' THEN cp.CampanaRutaPDF
-          WHEN (g.grumar = 'UN' OR g.grudesc LIKE '%UNIROYAL%' OR a.ALMNOM LIKE '%UNIROYAL%') AND cp.CampanaDescripcion LIKE '%Uniroyal%' THEN cp.CampanaRutaPDF
-          WHEN (g.grudesc LIKE '%BRIDGESTONE%' OR a.ALMNOM LIKE '%BRIDGESTONE%') AND cp.CampanaDescripcion LIKE '%Bridgestone%' THEN cp.CampanaRutaPDF
-          ELSE NULL 
-        END) as CampanaPDF,
+        MAX(cp.CampanaDescripcion) as CampanaNombre,
+        MAX(cp.CampanaRutaPDF) as CampanaPDF,
         ${branchSelects}
       FROM almcat a 
       LEFT JOIN almgru g ON a.grucve = g.grucve 
@@ -82,12 +70,6 @@ app.get('/api/existencias/search', async (req, res) => {
         a.almrin BETWEEN cp.CampanaRinInicio AND cp.CampanaRinFin 
         AND (cp.CampanaCateg = '' OR g.gruclas = cp.CampanaCateg)
         AND CURDATE() BETWEEN cp.CampanaFechaInicio AND cp.CampanaFechaFin
-        AND (
-            (cp.CampanaDescripcion LIKE '%Michelin%' AND (g.grumar = 'MI' OR g.grudesc LIKE '%MICHELIN%')) OR
-            (cp.CampanaDescripcion LIKE '%BFGoodrich%' AND (g.grumar = 'BF' OR g.grudesc LIKE '%BFGOODRICH%')) OR
-            (cp.CampanaDescripcion LIKE '%Uniroyal%' AND (g.grumar = 'UN' OR g.grudesc LIKE '%UNIROYAL%')) OR
-            (cp.CampanaDescripcion LIKE '%Bridgestone%' AND g.grudesc LIKE '%BRIDGESTONE%')
-        )
       )
       WHERE 1=1
     `;
@@ -130,6 +112,8 @@ app.get('/api/existencias/search', async (req, res) => {
         }
       }
     }
+    
+    query += " AND g.gruclas IN ('A','C','M','D','G','E','B','O')";
     query += " GROUP BY a.almcve";
     
     if (conExistencias === 'true') {
