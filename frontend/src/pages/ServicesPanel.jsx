@@ -86,8 +86,9 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
           clave: p.Clave || '-',
           statusDetail: isGamma ? 'Gamma' : (p.Status === 'F' ? 'Fuera de Gamma' : (p.Status || 'Activo')),
           description: p.Descripcion || 'Sin Descripción',
+          clase: p.gruclas || '',
           mspn: p.NParte || '-',
-          brand: p.Grupo || 'Multi',
+          brand: (p.Grupo && p.Grupo !== 'Multi') ? p.Grupo : (filters.marca && filters.marca !== 'TODOS' && filters.marca !== 'INICIO' ? filters.marca : 'Multi'),
           stock: totalStock,
           priceList: Number(p.PLista) || 0,
           discountPercent: Number(p.Descuento) || 0,
@@ -220,36 +221,17 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
               {/* Layer 1: Promo Banner (Branding) */}
               <PromoBanner />
 
-              {/* Layer 2: Global Search / Actions Header - Border removed */}
-              <div className="">
-                <ServicesHeader
-                  onCartClick={() => setCartOpen(true)}
-                  searchTerm={filters.nombre}
-                  onSearchChange={(val) => handleFilterChange({ nombre: val })}
-                  cartCount={cartCount}
-                  cartTotal={cartTotal}
-                />
-              </div>
-
-              {/* Layer 3: Filter Indicator Section - No Background/Border, just floating info */}
-              <div className="px-4 sm:px-6 md:px-8 py-2 pb-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div className="flex items-center gap-3 px-1">
-                    <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      Resultados Filtrados: <span className="text-brand-red">{filters.marca || 'TODOS'}</span>
-                      {filters.ancho && <span className="ml-2 italic text-slate-400">/ A: {filters.ancho}</span>}
-                    </span>
-                    <XCircle
-                      className="w-4 h-4 text-slate-300 cursor-pointer hover:text-brand-red transition-colors"
-                      onClick={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: true })}
-                    />
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic px-3 py-1">
-                    Sincronización: {lastSync}
-                  </span>
-                </div>
-              </div>
+              {/* Layer 2: Main Search, Filters, Sync & Cart (Merged into one row) */}
+              <ServicesHeader
+                onCartClick={() => setCartOpen(true)}
+                searchTerm={filters.nombre}
+                onSearchChange={(val) => handleFilterChange({ nombre: val })}
+                cartCount={cartCount}
+                cartTotal={cartTotal}
+                filters={filters}
+                lastSync={lastSync}
+                onClearFilters={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: true })}
+              />
             </div>
 
             {/* Scrollable Data Area - Single Scroll System */}
