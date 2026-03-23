@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft, ShoppingCart, Minus, Plus, MapPin, Package, Tag, Info } from 'lucide-react';
 
 const ALL_BRANCHES = [
@@ -25,7 +26,11 @@ const TireImage = ({ product }) => {
   const desc = (product.description || '').toUpperCase();
   const clase = (product.clase || '').toUpperCase();
   
-  if (desc.includes('11R22') || desc.includes('11R24') || desc.includes('295/80') || desc.includes('315/80') || desc.includes('TBR') || clase.includes('CAMI')) {
+  if (desc.includes('CAMARA') || desc.includes('CÁMARA')) {
+    tireType = 'camara';
+  } else if (desc.includes('CORBATA')) {
+    tireType = 'corbata';
+  } else if (desc.includes('11R22') || desc.includes('11R24') || desc.includes('295/80') || desc.includes('315/80') || desc.includes('TBR') || clase.includes('CAMI')) {
     tireType = 'camion';
   } else if (desc.includes('AGR') || desc.includes('TRACTOR') || clase.includes('AGRI')) {
     tireType = 'agricola';
@@ -73,12 +78,20 @@ const TireImage = ({ product }) => {
 };
 
 const ProductModal = ({ product, onClose }) => {
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (product) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = 'unset'; };
+    }
+  }, [product]);
+
   if (!product) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 lg:p-8 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div 
-        className="bg-white rounded-3xl w-full max-w-5xl max-h-[95vh] overflow-hidden shadow-2xl flex flex-col animate-slide-up relative"
+        className="bg-white rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-slide-up relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Ribbon */}
@@ -192,7 +205,8 @@ const ProductModal = ({ product, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -369,10 +383,10 @@ const DataGrid = ({ products: externalProducts, onAddToCart }) => {
   const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div ref={gridRef} className="relative animate-slide-up flex flex-col min-h-full">
+    <div ref={gridRef} className="relative flex flex-col min-h-full">
       
       {/* Product Grid Area */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 lg:gap-6 mb-8">
+      <div className="animate-slide-up grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 lg:gap-6 mb-8">
         {paginatedProducts.map((product) => (
           <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} onClick={setSelectedProduct} />
         ))}
