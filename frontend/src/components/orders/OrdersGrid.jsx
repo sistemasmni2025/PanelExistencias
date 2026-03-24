@@ -26,181 +26,185 @@ const OrderDetailModal = ({ orderId, onClose }) => {
   if (!orderId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in slide-in-from-bottom-4 duration-300">
-        {/* Modal Header */}
-        <div className="bg-[#003d7a] p-4 sm:p-6 text-white flex justify-between items-center shrink-0">
-          <div>
-            <h2 className="text-xl font-black uppercase tracking-tight">Venta Information</h2>
-            <p className="text-xs font-bold text-[#ffce00] mt-1 tracking-widest">Id C: {data?.header?.id_c || orderId}</p>
+    <div className="fixed inset-0 z-50 flex py-10 justify-center px-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-white w-full max-w-5xl shadow-2xl relative h-max min-h-[500px]">
+        <button onClick={onClose} className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded text-slate-500">
+          <X className="w-6 h-6" />
+        </button>
+
+        <div className="p-6">
+          {/* Header to match screenshot Exactly */}
+          <div className="mb-4 text-slate-800">
+            <h2 className="text-[19px] font-bold mb-1">Venta Information</h2>
+            <p className="text-[13px] text-slate-700">Id C &nbsp;{data?.header?.id_c || orderId}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
 
-        {/* Tabs */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 flex items-center gap-1 shrink-0 overflow-x-auto hide-scrollbar">
-          {[
-            { id: 'general', label: 'General', icon: Info },
-            { id: 'detalle', label: 'Detalle', icon: Package },
-            { id: 'surtimiento', label: 'Surtimiento', icon: CheckCircle2 }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-4 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all relative whitespace-nowrap ${
-                activeTab === tab.id ? 'text-[#003d7a]' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'animate-pulse' : ''}`} />
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#8B0000] rounded-t-full"></div>
-              )}
-            </button>
-          ))}
-        </div>
+          {/* Old System Tabs */}
+          <div className="flex items-end border-b border-black mb-4">
+            {[
+              { id: 'general', label: 'General' },
+              { id: 'detalle', label: 'Detalle' },
+              { id: 'surtimiento', label: 'Surtimiento' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-1.5 text-[13px] font-medium rounded-t-lg mr-1 border border-b-0 border-black transition-none ${
+                  activeTab === tab.id 
+                    ? 'bg-white text-[#b50035] border-t-2 border-t-[#b50035] border-x-black z-10 -mb-[1px]' 
+                    : 'bg-[#2b2b2b] text-white hover:bg-[#3b3b3b]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Modal Content */}
-        <div className="flex-1 overflow-auto p-4 sm:p-8 bg-white">
-          {loading ? (
-            <div className="h-full flex flex-col items-center justify-center gap-4 py-20">
-              <Loader2 className="w-10 h-10 text-[#003d7a] animate-spin" />
-              <span className="text-sm font-black text-[#003d7a] uppercase tracking-widest">Consultando Detalle...</span>
-            </div>
-          ) : data ? (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-500">
-              {activeTab === 'general' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4">
-                  {[
-                    { label: 'Id', value: data.header.id },
-                    { label: 'Fecha', value: data.header.fecha },
-                    { label: 'Status', value: data.header.status_desc },
-                    { label: 'Login', value: data.header.login },
-                    { label: 'No.Cliente', value: data.header.no_cliente },
-                    { label: 'Orden de Venta', value: data.header.orden_venta },
-                    { label: 'Subtotal', value: data.header.subtotal, highlight: true },
-                    { label: 'Iva', value: data.header.iva, highlight: true },
-                    { label: 'Total', value: data.header.total, highlight: true, bold: true },
-                    { label: 'Tipo', value: data.header.tipo },
-                    { label: 'Tipo (Auto)', value: data.header.tipo_bool },
-                    { label: 'Observaciones', value: data.header.observaciones, full: true },
-                    { label: 'Id C', value: data.header.id_c },
-                    { label: 'Serie', value: data.header.serie || 'N/A' },
-                    { label: 'Factura', value: data.header.factura || '0' },
-                    { label: 'Solicitud', value: data.header.solicitud },
-                    { label: 'Factura Hora', value: data.header.factura_hora },
-                    { label: 'Almacén', value: data.header.almacen },
-                    { label: 'Entrega', value: data.header.entrega },
-                    { label: 'Recepción', value: data.header.recepcion },
-                    { label: 'Tránsito', value: data.header.transito },
-                    { label: 'Ruta', value: data.header.ruta },
-                    { label: 'Vehiculo', value: data.header.vehiculo },
-                    { label: 'Usuario', value: data.header.usuario_nombre, full: true },
-                    { label: 'Observacion N', value: data.header.observacion_n, full: true },
-                    { label: 'Sucursal', value: data.header.sucursal },
-                    { label: 'Recibio', value: data.header.recibio },
-                    { label: 'Surtimiento', value: data.header.surtimiento }
-                  ].map((field, i) => (
-                    <div key={i} className={`flex flex-col py-2 border-b border-slate-50 ${field.full ? 'md:col-span-2 lg:col-span-4' : ''}`}>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">{field.label}</span>
-                      <span className={`text-xs font-bold ${field.highlight ? 'text-[#003d7a]' : 'text-slate-700'} ${field.bold ? 'text-sm font-black' : ''}`}>
-                        {field.value || '-'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Content */}
+          <div className="px-1 text-[13px] text-slate-700 font-sans pb-10">
+            {loading ? (
+              <div className="py-20 text-center text-slate-500">Cargando...</div>
+            ) : data ? (
+              <>
+                {activeTab === 'general' && (
+                  <div className="flex flex-col gap-1.5 max-w-sm">
+                    {[
+                      { label: 'Id', value: data.header.id },
+                      { label: 'Fecha', value: data.header.fecha },
+                      { label: 'Status', value: data.header.status_desc },
+                      { label: 'Login', value: data.header.login },
+                      { label: 'No.Cliente', value: data.header.no_cliente },
+                      { label: 'Orden de Venta', value: data.header.orden_venta },
+                      { label: 'Subtotal', value: data.header.subtotal.replace('$', '') },
+                      { label: 'Iva', value: data.header.iva.replace('$', '') },
+                      { label: 'Total', value: data.header.total.replace('$', '') },
+                      { label: 'Tipo', value: data.header.tipo },
+                      { label: 'Tipo', value: data.header.tipo_bool },
+                      { label: 'Observaciones', value: data.header.observaciones },
+                      { label: 'Id C', value: data.header.id_c },
+                      { label: 'Serie', value: data.header.serie },
+                      { label: 'Factura', value: data.header.factura },
+                      { label: 'Status', value: data.header.status === 'S' ? 'Solicitada' : data.header.status },
+                      { label: 'Solicitud', value: data.header.solicitud },
+                      { label: 'Factura', value: data.header.factura_hora },
+                      { label: 'Almacén', value: data.header.almacen },
+                      { label: 'Entrega', value: data.header.entrega },
+                      { label: 'Recepción', value: data.header.recepcion },
+                      { label: 'Tránsito', value: data.header.transito },
+                      { label: 'Id. Sucursal', value: data.header.sucursal },
+                      { label: 'Ruta', value: data.header.ruta },
+                      { label: 'Vehiculo', value: data.header.vehiculo },
+                      { label: 'Usuario', value: data.header.usuario_nombre, link: true },
+                      { label: 'Observacion', value: data.header.observacion_n },
+                      { label: 'Sucursal', value: data.header.sucursal },
+                      { label: 'Login', value: data.header.login },
+                      { label: 'Usuario Nombre', value: data.header.usuario_nombre },
+                      { label: 'Perfil Id', value: '0' },
+                      { label: 'Recibio', value: data.header.recibio },
+                      { label: 'Surtimiento', value: data.header.surtimiento }
+                    ].map((field, i) => (
+                      <div key={i} className="flex">
+                        <div className="w-[140px] shrink-0 text-slate-500">{field.label}</div>
+                        <div className="flex-1">
+                          {field.link ? (
+                            <span className="text-slate-600 underline cursor-pointer">{field.value}</span>
+                          ) : (
+                            field.value || ''
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              {activeTab === 'detalle' && (
-                <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
-                  <table className="w-full text-left border-collapse min-w-[1000px]">
-                    <thead className="bg-[#8B0000] text-white">
-                      <tr>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase">Clave</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase">Descripción</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Iva</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Cantidad</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-right">Venta</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-right">Iva Importe</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-right">Detalle Subtotal</th>
-                        <th className="px-4 py-3 text-[10px) font-black uppercase text-right">Costo</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-right">P. Lista</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Detalle Original</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-right">Detalle PVN</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 italic">
-                      {data.items.map((item, i) => (
-                        <tr key={i} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 text-xs font-bold text-[#003d7a]">{item.clave}</td>
-                          <td className="px-4 py-3 text-[11px] font-medium text-slate-600">{item.descripcion}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-center text-slate-500">{item.iva}</td>
-                          <td className="px-4 py-3 text-xs font-black text-slate-700 text-center">{item.cantidad}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-600 text-right">{item.venta}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-400 text-right">{item.iva_importe}</td>
-                          <td className="px-4 py-3 text-xs font-black text-[#003d7a] text-right">{item.subtotal}</td>
-                          <td className="px-4 py-3 text-xs font-medium text-slate-400 text-right">{item.costo}</td>
-                          <td className="px-4 py-3 text-xs font-medium text-slate-400 text-right">{item.p_lista}</td>
-                          <td className="px-4 py-3 text-xs font-medium text-slate-400 text-center">{item.original}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-[#003d7a] text-right">{item.pvn}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {activeTab === 'surtimiento' && (
-                <div className="overflow-x-auto border border-slate-200 rounded-2xl shadow-sm">
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead className="bg-[#8B0000] text-white">
-                      <tr>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase">Clave</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Actual</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase">Nombre</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Terminado</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Pedido</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Porcentaje Inicial</th>
-                        <th className="px-4 py-3 text-[10px] font-black uppercase text-center">Marca</th>
-                        <th className="px-4 py-3 text-[10px) font-black uppercase text-center">Grupo</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 italic">
-                      {data.surtimiento.map((st, i) => (
-                        <tr key={i} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 text-xs font-bold text-[#003d7a] text-center">{st.clave}</td>
-                          <td className="px-4 py-3 text-xs font-black text-slate-700 text-center">{st.actual}</td>
-                          <td className="px-4 py-3 text-[11px] font-medium text-slate-600">{st.nombre}</td>
-                          <td className="px-4 py-3 text-center">
-                            <div className={`w-4 h-4 mx-auto rounded border ${st.terminado ? 'bg-emerald-500 border-emerald-600' : 'bg-slate-100 border-slate-300'}`}>
-                              {st.terminado && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-xs font-bold text-[#003d7a] text-center">{st.pedido}</td>
-                          <td className="px-4 py-3 text-xs font-black text-slate-700 text-center">{st.porcentaje_inicial}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-500 text-center">{st.marca}</td>
-                          <td className="px-4 py-3 text-xs font-bold text-slate-500 text-center">{st.grupo}</td>
-                        </tr>
-                      ))}
-                      {data.surtimiento.length === 0 && (
+                {activeTab === 'detalle' && (
+                  <div className="overflow-x-auto border-t border-slate-300">
+                    <table className="w-full text-left text-[12px] border-collapse whitespace-nowrap">
+                      <thead className="bg-[#b50035] text-white">
                         <tr>
-                          <td colSpan="8" className="px-4 py-20 text-center text-slate-400 font-bold italic uppercase tracking-widest">
-                            No hay información de surtimiento disponible
-                          </td>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Clave</th>
+                          <th className="px-2 py-1.5 font-semibold border-r border-[#95002a]">Descripción</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Iva</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Cantidad</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Venta</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Iva Importe</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detalle Subtotal</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Costo</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">P. Lista</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detalle Original</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detallemfdescncp</th>
+                          <th className="px-2 py-1.5 font-semibold text-center">Detalle PVN</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center text-slate-400">
-              No se pudo cargar la información del pedido.
-            </div>
-          )}
+                      </thead>
+                      <tbody>
+                        {data.items.map((item, i) => (
+                          <tr key={i} className="border-b border-slate-100/50 hover:bg-slate-50">
+                            <td className="px-2 py-1 text-slate-700 text-center">{item.clave}</td>
+                            <td className="px-2 py-1 text-slate-600">{item.descripcion}</td>
+                            <td className="px-2 py-1 text-slate-700 text-center">{item.iva}</td>
+                            <td className="px-2 py-1 text-slate-900 text-right">{item.cantidad}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.venta.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.iva_importe.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.subtotal.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.costo.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.p_lista.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.original}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.mfdescncp.replace('$', '')}</td>
+                            <td className="px-2 py-1 text-slate-700 text-right">{item.pvn.replace('$', '')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {activeTab === 'surtimiento' && (
+                  <div className="overflow-x-auto border-t border-slate-300">
+                    <table className="w-full text-left text-[12px] border-collapse whitespace-nowrap">
+                      <thead className="bg-[#b50035] text-white">
+                        <tr>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Clave</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Actual</th>
+                          <th className="px-2 py-1.5 font-semibold border-r border-[#95002a]">Nombre</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Terminado</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Pedido</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Porcentaje Inicial</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Porcentaje Actual</th>
+                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Marca</th>
+                          <th className="px-2 py-1.5 font-semibold text-center">Grupo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.surtimiento.map((st, i) => (
+                          <tr key={i} className="border-b border-slate-100/50 hover:bg-slate-50">
+                            <td className="px-2 py-1 text-slate-700 text-center">{st.clave}</td>
+                            <td className="px-2 py-1 text-slate-900 text-right">{st.actual}</td>
+                            <td className="px-2 py-1 text-slate-600">{st.nombre}</td>
+                            <td className="px-2 py-1 text-center">
+                              {st.terminado ? (
+                                <div className="w-3.5 h-3.5 mx-auto bg-slate-200 border border-slate-300 rounded-sm flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white fill-current" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
+                                </div>
+                              ) : (
+                                <div className="w-3.5 h-3.5 mx-auto bg-white border border-slate-300 rounded-sm"></div>
+                              )}
+                            </td>
+                            <td className="px-2 py-1 text-slate-900 text-center">{st.pedido}</td>
+                            <td className="px-2 py-1 text-slate-900 text-center">{st.porcentaje_inicial}</td>
+                            <td className="px-2 py-1 text-slate-900 text-center">{st.porcentaje_inicial}</td>
+                            <td className="px-2 py-1 text-slate-700 text-center">{st.marca}</td>
+                            <td className="px-2 py-1 text-slate-700 text-center">{st.grupo}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-20 text-slate-500">Error cargando detalles.</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -211,10 +215,14 @@ const OrdersGrid = ({ user }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [filters, setFilters] = useState({
-    desde: '2024-01-01', 
-    hasta: new Date().toISOString().split('T')[0],
-    status: 'Todos'
+  const [filters, setFilters] = useState(() => {
+    const today = new Date();
+    const firstDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+    return {
+      desde: firstDay, 
+      hasta: today.toISOString().split('T')[0],
+      status: 'Todos'
+    };
   });
 
   const fetchOrders = async () => {
@@ -257,29 +265,6 @@ const OrdersGrid = ({ user }) => {
           <p className="text-sm font-medium text-slate-500">
             Administración y seguimiento histórico de requerimientos
           </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-[#003d7a] transition-colors shadow-sm text-xs font-bold uppercase tracking-wider"
-          >
-            <Printer className="w-4 h-4" /> Imprimir
-          </button>
-          <button 
-            onClick={() => {
-                const headers = ['ID', 'Fecha', 'Status', 'Cliente', 'OV', 'Subtotal', 'IVA', 'Total'];
-                const rows = orders.map(o => [o.id, o.fecha, o.status, o.cliente, o.ordenVenta, o.subtotal, o.iva, o.total]);
-                const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
-                const l = document.createElement("a");
-                l.setAttribute("href", encodeURI(csvContent));
-                l.setAttribute("download", "pedidos.csv");
-                l.click();
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-[#003d7a] transition-colors shadow-sm text-xs font-bold uppercase tracking-wider"
-          >
-            <Download className="w-4 h-4" /> Exportar
-          </button>
         </div>
       </div>
 
@@ -330,52 +315,51 @@ const OrdersGrid = ({ user }) => {
 
         {/* VIEW FOR DESKTOP */}
         <div className="hidden md:block bg-[#003d7a] border-b-[3px] border-[#ffce00] px-4 py-3.5 overflow-x-auto print:bg-white print:border-slate-800 print:text-black">
-          <div className="min-w-[1300px] grid grid-cols-[50px_40px_100px_90px_130px_90px_140px_90px_100px_100px_110px_50px_70px_1fr_1fr] gap-2 items-center">
+          <div className="min-w-[1020px] grid grid-cols-[80px_60px_80px_100px_90px_250px_90px_90px_90px_100px_1fr] gap-2 items-center">
             <div className="print:hidden"></div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Id</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Fecha</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Status</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Status Doc</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Login</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Cliente</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">OV</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Subtotal</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">IVA</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Total</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Serie</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black">Fac</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Obs. Cliente</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Obs. Nieto</div>
+            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-center">Imprimir</div>
           </div>
         </div>
 
         <div className="hidden md:block divide-y divide-slate-100 overflow-x-auto custom-scrollbar">
-          <div className="min-w-[1300px]">
-            {orders.map((order, idx) => (
-              <div key={idx} className="grid grid-cols-[50px_40px_100px_90px_130px_90px_140px_90px_100px_100px_110px_50px_70px_1fr_1fr] gap-2 items-center px-4 py-3 hover:bg-slate-50 transition-colors print:bg-transparent">
+          <div className="min-w-[1020px]">
+            {orders.map((order, idx) => {
+              const fullStatus = order.status === 'C' ? 'CERRADO' : order.status === 'A' ? 'ABIERTO' : order.status === 'S' ? 'SOLICITADA' : order.status === 'F' ? 'FACTURADA' : order.status === 'E' ? 'ENTREGADA' : order.status === 'T' ? 'EN TRANSITO' : order.status === 'R' ? 'RECEPCION' : order.status;
+              
+              return (
+              <div key={idx} className="grid grid-cols-[80px_60px_80px_100px_90px_250px_90px_90px_90px_100px_1fr] gap-2 items-center px-4 py-3 hover:bg-slate-50 transition-colors print:bg-transparent">
                 <div className="print:hidden flex justify-center">
-                  <button onClick={() => setSelectedOrderId(order.id)} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-brand-blue transition-colors">
-                    <Printer className="w-4 h-4 cursor-pointer" />
+                  <button onClick={() => setSelectedOrderId(order.id)} className="px-3 py-1.5 border border-slate-300 hover:border-[#003d7a] hover:bg-[#003d7a] hover:text-white rounded transition-colors flex items-center justify-center gap-1.5 shadow-sm text-slate-600">
+                    <FileText className="w-3.5 h-3.5" /> <span className="text-[9px] font-black uppercase tracking-wider">Detalle</span>
                   </button>
                 </div>
                 <div className="text-xs font-bold text-slate-500">#{order.id}</div>
-                <div className="text-xs font-black text-[#003d7a] cursor-pointer hover:underline" onClick={() => setSelectedOrderId(order.id)}>
+                <div className="text-xs font-black text-slate-700">
                   {order.fecha}
                 </div>
-                <div className="text-[10px] font-black uppercase text-slate-600 truncate">{order.status}</div>
-                <div className="text-[10px] font-medium text-slate-500 truncate">{order.statusDoc}</div>
+                <div className="text-[10px] font-black uppercase text-[#003d7a] truncate">{fullStatus}</div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase">{order.login}</div>
                 <div className="text-xs font-bold text-slate-700 truncate" title={order.cliente}>{order.cliente}</div>
                 <div className="text-xs font-black text-[#003d7a]">{order.ordenVenta}</div>
                 <div className="text-xs font-bold text-slate-600 text-right">{order.subtotal}</div>
                 <div className="text-xs font-bold text-slate-400 text-right">{order.iva}</div>
                 <div className="text-xs font-black text-[#003d7a] text-right">{order.total}</div>
-                <div className="text-xs font-bold text-slate-500">{order.serie || '-'}</div>
-                <div className="text-xs font-bold text-slate-500">{order.factura || '-'}</div>
-                <div className="text-[10px] font-medium text-slate-500 text-right truncate" title={order.obsCliente}>{order.obsCliente || '-'}</div>
-                <div className="text-[10px] font-medium text-slate-500 text-right truncate" title={order.obsNieto}>{order.obsNieto || '-'}</div>
+                <div className="flex items-center justify-center print:hidden">
+                  <button onClick={() => window.print()} className="p-2 text-slate-400 hover:text-[#003d7a] hover:bg-slate-200 rounded-lg transition-colors cursor-pointer" title="Imprimir Requerimiento">
+                    <Printer className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
