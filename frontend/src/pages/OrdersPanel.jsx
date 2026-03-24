@@ -2,7 +2,7 @@ import React from 'react';
 import { Home, LogOut, Truck } from 'lucide-react';
 import OrdersGrid from '../components/orders/OrdersGrid';
 
-const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout }) => {
+const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout, user }) => {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans antialiased relative">
       {/* Background ambient accents for specialized look */}
@@ -63,7 +63,7 @@ const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout }) => {
         {/* Scrollable Data Area - Single Scroll System */}
         <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
           <div className="w-full mx-auto space-y-8 animate-slide-up p-4 sm:p-6 md:p-8 pt-6 sm:pt-8 md:pt-10">
-            <OrdersGrid />
+            <OrdersGrid user={user} />
           </div>
         </div>
       </main>

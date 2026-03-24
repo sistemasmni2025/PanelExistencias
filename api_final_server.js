@@ -37,10 +37,10 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma } = req.query;
   try {
-    const [branches] = await pool.query("SELECT SucursalId, SucursalAbreviacion as sigla FROM sucursal WHERE SucursalAbreviacion IS NOT NULL");
+    const [branches] = await pool.query("SELECT SucursalId, SucursalAbreviacion as sigla FROM sucursal WHERE SucursalId IN (1,2,3,4,5,6,7,8,9,11)");
     
     const branchSelects = branches.map(b => 
-      "MAX(CASE WHEN s.SucursalId = " + b.SucursalId + " THEN s.almstock ELSE 0 END) AS " + b.sigla
+      `MAX(CASE WHEN s.SucursalId = ${b.SucursalId} THEN s.almstock ELSE 0 END) AS ${b.sigla}`
     ).join(', ');
 
     let query = `
@@ -97,11 +97,11 @@ app.get('/api/existencias/search', async (req, res) => {
     if (serie) { query += " AND a.almserie = ?"; params.push(serie); }
     if (rin) { query += " AND a.almrin = ?"; params.push(rin); }
     if (nombre) { 
-      query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)"; 
-      params.push('%' + nombre + '%', '%' + nombre + '%'); 
+        query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)"; 
+        params.push('%' + nombre + '%', '%' + nombre + '%'); 
     }
     if (isGamma === 'true') {
-      query += " AND a.almstat = 'G'";
+        query += " AND a.almstat = 'G'";
     }
     
     if (marca && marca !== 'TODOS' && !nombre) { 
@@ -170,7 +170,7 @@ app.get('/api/pedidos', async (req, res) => {
     `;
     const params = [];
 
-    if (usuario) {
+    if (usuario && usuario !== 'ADMIN') {
       query += ' AND v.UsuarioLogin = ?';
       params.push(usuario);
     }
@@ -183,8 +183,15 @@ app.get('/api/pedidos', async (req, res) => {
       params.push(hasta);
     }
     if (status && status !== 'Todos') {
+      let statusCode = status;
+      if (status === 'Solicitada') statusCode = 'S';
+      else if (status === 'Facturada') statusCode = 'F';
+      else if (status === 'En Transito') statusCode = 'T';
+      else if (status === 'Entregada') statusCode = 'E';
+      else if (status === 'Recepcion Almacen') statusCode = 'R';
+      
       query += ' AND v.VentaStatus = ?';
-      params.push(status.charAt(0).toUpperCase());
+      params.push(statusCode);
     }
 
     query += ' GROUP BY v.VentaId ORDER BY v.VentaId DESC LIMIT 100';
@@ -192,32 +199,55 @@ app.get('/api/pedidos', async (req, res) => {
     const [rows] = await pool.query(query, params);
     
     const formattedRows = rows.map(r => {
-      const subtotal = r.subtotal_num || 0;
-      const iva = r.iva_num || 0;
+      const subtotal = parseFloat(r.subtotal_num) || 0;
+      const iva = parseFloat(r.iva_num) || 0;
       const total = subtotal + iva;
       
-      let statusDesc = 'Desconocido';
+      let statusBadge = 'SOLICITADA';
+      let statusDoc = 'En Captura';
+      
       switch(r.VentaStatus) {
-        case 'S': statusDesc = 'Solicitada'; break;
-        case 'F': statusDesc = 'Facturada'; break;
-        case 'E': statusDesc = 'Entregada'; break;
-        case 'T': statusDesc = 'En Transito'; break;
-        case 'R': statusDesc = 'Recepción'; break;
-        default: statusDesc = r.VentaStatus;
+        case 'S': 
+          statusBadge = 'SOLICITADA'; 
+          statusDoc = 'En Captura'; 
+          break;
+        case 'F': 
+          statusBadge = 'FACTURADA'; 
+          statusDoc = 'Facturado'; 
+          break;
+        case 'E': 
+          statusBadge = 'ENTREGADA'; 
+          statusDoc = 'Entregado'; 
+          break;
+        case 'T': 
+          statusBadge = 'EN TRANSITO'; 
+          statusDoc = 'En Transito'; 
+          break;
+        case 'R': 
+          statusBadge = 'RECEPCION'; 
+          statusDoc = 'Recepción Almacén'; 
+          break;
+        default: 
+          statusBadge = r.VentaStatus || 'N/A';
+          statusDoc = r.VentaStatus || 'Procesando';
       }
+
+      const formatCurrency = (val) => {
+        return val.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      };
 
       return {
         id: r.id.toString(),
         fecha: r.fecha,
-        status: statusDesc,
-        statusDoc: statusDesc, 
+        status: statusBadge,
+        statusDoc: statusDoc, 
         login: r.login,
-        cliente: r.cliente,
-        ordenVenta: r.ordenVenta ? 'OV-' + r.ordenVenta : '',
-        subtotal: '$' + subtotal.toFixed(2),
-        iva: '$' + iva.toFixed(2),
-        total: '$' + total.toFixed(2),
-        serie: r.serie,
+        cliente: r.cliente || 'Consumidor Final',
+        ordenVenta: r.ordenVenta ? 'OV-' + r.ordenVenta : 'S/O',
+        subtotal: '$' + formatCurrency(subtotal),
+        iva: '$' + formatCurrency(iva),
+        total: '$' + formatCurrency(total),
+        serie: r.serie || '',
         factura: r.factura ? 'F-' + r.factura : '',
         obsCliente: r.obsCliente,
         obsNieto: r.obsNieto
@@ -230,94 +260,70 @@ app.get('/api/pedidos', async (req, res) => {
   }
 });
 
-// --- COTIZACIONES ---
-app.get('/api/cotizaciones', async (req, res) => {
-  const { usuario } = req.query;
-  try {
-    let query = 'SELECT * FROM Cotizacion';
-    const params = [];
-    if (usuario) {
-      query += ' WHERE UsuarioLogin = ?';
-      params.push(usuario);
-    }
-    query += ' ORDER BY CotizacionId DESC LIMIT 50';
-    const [rows] = await pool.query(query, params);
-    res.json(rows);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get('/api/cotizaciones/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [header] = await pool.query('SELECT * FROM Cotizacion WHERE CotizacionId = ?', [id]);
-    const [details] = await pool.query('SELECT * FROM CotizacionDetalle WHERE CotizacionId = ?', [id]);
-    
-    if (header.length > 0) {
-      res.json({ ...header[0], items: details });
-    } else {
-      res.status(404).json({ error: 'Cotización no encontrada' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/cotizaciones', async (req, res) => {
-  const { UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail } = req.body;
-  try {
-    const d = new Date();
-    const fecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const [result] = await pool.query(
-      'INSERT INTO Cotizacion (CotizacionFecha, UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [fecha, UsuarioLogin, nclicve || 0, nclinom || '', ncategcve || 1, nclidcred || 0, nclimail || '']
-    );
-    res.json({ success: true, CotizacionId: result.insertId });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.put('/api/cotizaciones/:id', async (req, res) => {
+// --- DETALLE DE PEDIDO ESPECÍFICO (TABS: GENERAL, DETALLE, SURTIMIENTO) ---
+app.get('/api/pedidos/:id', async (req, res) => {
   const { id } = req.params;
-  const { nclicve, nclinom, nclimail } = req.body;
   try {
-    if (!nclicve || nclicve == 0) {
-      await pool.query(
-        'UPDATE Cotizacion SET nclicve = 0, nclinom = ?, ncategcve = 1, nclidcred = 0, nclimail = ? WHERE CotizacionId = ?',
-        [nclinom, nclimail, id]
-      );
-    } else {
-      await pool.query(
-        'UPDATE Cotizacion SET nclicve = ?, nclinom = ?, nclimail = ? WHERE CotizacionId = ?',
-        [nclicve, nclinom, nclimail, id]
-      );
-    }
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    const [headerRows] = await pool.query(`
+      SELECT 
+        v.*,
+        DATE_FORMAT(v.VentaFecha, '%d/%m/%Y') as fecha_fmt,
+        DATE_FORMAT(v.VentaHoraSolicitud, '%d/%m/%Y %h:%i %p') as solicitud_fmt,
+        DATE_FORMAT(v.VentaHoraFactura, '%d/%m/%Y %h:%i %p') as factura_fmt,
+        DATE_FORMAT(v.VentaHoraAlmacen, '%d/%m/%Y %h:%i %p') as almacen_fmt,
+        DATE_FORMAT(v.VentaHoraEntrega, '%d/%m/%Y %h:%i %p') as entrega_fmt,
+        DATE_FORMAT(v.VentaHoraRecepcion, '%d/%m/%Y %h:%i %p') as recepcion_fmt,
+        DATE_FORMAT(v.VentaHoraTransito, '%d/%m/%Y %h:%i %p') as transito_fmt,
+        u.UsuarioNombre as cliente_nombre,
+        u.UsuarioId as no_cliente,
+        s.SucursalAbreviacion as sucursal_nombre
+      FROM venta v
+      LEFT JOIN usuario u ON v.UsuarioLogin = u.usuariologin
+      LEFT JOIN sucursal s ON v.SucursalId = s.SucursalId
+      WHERE v.VentaId = ?
+    `, [id]);
+
+    if (headerRows.length === 0) return res.status(404).json({ error: 'No encontrado' });
+    const h = headerRows[0];
+
+    const [detailRows] = await pool.query(`SELECT vd.*, a.ALMNOM as descrip, a.almplist as plist FROM ventadetalle vd LEFT JOIN almcat a ON vd.almcve = a.almcve WHERE vd.VentaId = ?`, [id]);
+    const [surtRows] = await pool.query(`SELECT vs.*, a.ALMNOM as nom, g.grumar as mar, g.grucve as gru FROM ventasurtimiento vs LEFT JOIN almcat a ON vs.SurtimientoClave = a.almcve LEFT JOIN almgru g ON a.grucve = g.grucve WHERE vs.VentaId = ?`, [id]);
+
+    const formatCurrency = (val) => (parseFloat(val) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    let st = 0, it = 0;
+    const items = detailRows.map(d => {
+      const imp = (d.VentaDetalleCan||0) * (parseFloat(d.VentaDetallePV)||0);
+      const ivi = d.VentaDetalleIva === 'S' ? imp * 0.16 : 0;
+      st += imp; it += ivi;
+      return {
+        clave: d.almcve, descripcion: d.descrip, iva: d.VentaDetalleIva, cantidad: d.VentaDetalleCan,
+        venta: '$'+formatCurrency(d.VentaDetallePV), iva_importe: '$'+formatCurrency(ivi),
+        subtotal: '$'+formatCurrency(imp), costo: '$'+formatCurrency(d.VentaDetalleMFPCos),
+        p_lista: '$'+formatCurrency(d.plist), original: d.VentaDetalleOriginal || 0,
+        mfdescncp: '$'+formatCurrency(d.VentaDetallemfdescncp), pvn: '$'+formatCurrency(d.VentaDetallePV)
+      };
+    });
+
+    res.json({
+      header: {
+        id: h.VentaId, fecha: h.fecha_fmt, status: h.VentaStatus, login: h.UsuarioLogin, no_cliente: h.no_cliente, 
+        orden_venta: h.VentaOrden, subtotal: '$'+formatCurrency(st), iva: '$'+formatCurrency(it), total: '$'+formatCurrency(st+it),
+        tipo: h.VentaTipo, tipo_bool: h.VentaStatusTipo ? 'true' : 'false', observaciones: h.VentaObservaciones, id_c: h.VentaIdC,
+        serie: h.VentaSerie, factura: h.VentaFactura, status_desc: h.VentaStatusInterno || 'N/A',
+        solicitud: h.solicitud_fmt || '-', factura_hora: h.factura_fmt || '-', almacen: h.almacen_fmt || '-', 
+        entrega: h.entrega_fmt || '-', recepcion: h.recepcion_fmt || '-', transito: h.transito_fmt || '-',
+        ruta: h.VentaRuta || '-', vehiculo: h.VentaVehiculo || '-', usuario_nombre: h.cliente_nombre,
+        observacion_n: h.VentaObservacion, sucursal: h.sucursal_nombre, recibio: h.VentaRecibio || '-', surtimiento: h.VentaSurtimiento || '0'
+      },
+      items,
+      surtimiento: surtRows.map(s => ({
+        clave: s.SurtimientoClave, actual: s.SurtimientoActual, nombre: s.nom, 
+        terminado: s.SurtimientoTerminado === 1, pedido: s.SurtimientoPedido, 
+        porcentaje_inicial: s.SurtimientoPorcentajeInicial, marca: s.mar, grupo: s.gru
+      }))
+    });
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-app.post('/api/cotizaciones/:id/items', async (req, res) => {
-  const { id } = req.params;
-  const { clave, concepto, cantidad, precio, justificacion, tipo, iva } = req.body;
-  try {
-    const [exists] = await pool.query('SELECT CotizacionDetalleCantidad FROM CotizacionDetalle WHERE CotizacionId = ? AND CotizacionDetalleClave = ?', [id, clave]);
-    if (exists.length > 0) {
-      const nuevaCantidad = exists[0].CotizacionDetalleCantidad + (cantidad || 1);
-      await pool.query('UPDATE CotizacionDetalle SET CotizacionDetalleCantidad = ? WHERE CotizacionId = ? AND CotizacionDetalleClave = ?', [nuevaCantidad, id, clave]);
-    } else {
-      await pool.query(
-        'INSERT INTO CotizacionDetalle (CotizacionId, CotizacionDetalleClave, CotizacionDetalleConcepto, CotizacionDetalleCantidad, CotizacionDetallePrecio, CotizacionDetalleJustificacion, CotizacionDetalleTipo, CotizacionDetalleIva) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [id, clave, concepto, cantidad || 1, precio || 0, justificacion || '', tipo || 'A', iva || 'S']
-      );
-    }
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.listen(4000, '0.0.0.0', () => console.log('API Multillantas Lista corriendo en puerto 4000'));
+app.listen(4000, '0.0.0.0', () => console.log('API Multillantas Nieto corriendo en puerto 4000'));

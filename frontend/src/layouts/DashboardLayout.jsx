@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import ServicesPanel from '../pages/ServicesPanel';
 import OrdersPanel from '../pages/OrdersPanel';
 
-const DashboardLayout = ({ onLogout }) => {
+const DashboardLayout = ({ onLogout, user }) => {
   const [activeView, setActiveView] = useState('services');
 
   return (
@@ -19,6 +19,7 @@ const DashboardLayout = ({ onLogout }) => {
           onNavigateHome={() => {/* setActiveView('home') - Disabled */}} 
           onNavigateOrders={() => setActiveView('orders')}
           onLogout={onLogout} 
+          user={user}
         />
       )}
 
@@ -27,6 +28,7 @@ const DashboardLayout = ({ onLogout }) => {
           onNavigateHome={() => {/* setActiveView('home') - Disabled */}} 
           onNavigateServices={() => setActiveView('services')}
           onLogout={onLogout} 
+          user={user}
         />
       )}
     </div>
