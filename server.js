@@ -19,17 +19,44 @@ const pool = mysql.createPool({
 app.post('/api/login', async (req, res) => {
   const { user, password } = req.body;
   try {
+    const cleanUser = (user || '').trim().toUpperCase();
+    const cleanPass = (password || '').trim();
+    
+    // RASTREADOR DE DIAGNÓSTICO PARA QA
     const [rows] = await pool.query(
-      "SELECT u.usuariologin, u.UsuarioNombre, u.SucursalId, s.SucursalAbreviacion as SucursalNombre FROM usuario u LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId WHERE TRIM(u.usuariologin) = ? AND (u.UsuarioPassword = ? OR u.UsuarioPass = ?)",
-      [user.trim(), password, password]
+      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.UsuarioKey FROM usuario u WHERE UPPER(TRIM(u.usuariologin)) = ?",
+      [cleanUser]
     );
+
     if (rows.length > 0) {
-      res.json({ success: true, user: rows[0] });
+      const dbUser = rows[0];
+      // ESTE LOG APARECERÁ EN TU CONSOLA DE NODE
+      console.log('--- DIAGNÓSTICO LOGIN ---');
+      console.log('Usuario:', dbUser.usuariologin);
+      console.log('Key (DB):', dbUser.UsuarioKey);
+      console.log('Password (DB - u.UsuarioPassword):', dbUser.UsuarioPassword);
+      console.log('Pass (DB - u.UsuarioPass):', dbUser.UsuarioPass);
+      console.log('Lo que escribiste:', cleanPass);
+      console.log('-------------------------');
+
+      const dbPass1 = (dbUser.UsuarioPassword || '').trim();
+      const dbPass2 = (dbUser.UsuarioPass || '').trim();
+      
+      const validPasswords = [cleanPass, cleanPass.toUpperCase()];
+      
+      if (validPasswords.includes(dbPass1) || validPasswords.includes(dbPass2)) {
+        res.json({ success: true, user: dbUser });
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          message: `Contraseña incorrecta. Revisar consola del servidor para diagnóstico (Key: ${dbUser.UsuarioKey || 'S/K'}).` 
+        });
+      }
     } else {
-      res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
+      res.status(401).json({ success: false, message: 'El usuario no existe.' });
     }
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -38,8 +65,8 @@ app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma } = req.query;
   try {
     const [branches] = await pool.query("SELECT SucursalId, SucursalAbreviacion as sigla FROM sucursal WHERE SucursalAbreviacion IS NOT NULL");
-    
-    const branchSelects = branches.map(b => 
+
+    const branchSelects = branches.map(b =>
       "MAX(CASE WHEN s.SucursalId = " + b.SucursalId + " THEN s.almstock ELSE 0 END) AS " + b.sigla
     ).join(', ');
 
@@ -91,20 +118,20 @@ app.get('/api/existencias/search', async (req, res) => {
       )
       WHERE 1=1
     `;
-    
+
     const params = [];
     if (ancho) { query += " AND a.almancho = ?"; params.push(ancho); }
     if (serie) { query += " AND a.almserie = ?"; params.push(serie); }
     if (rin) { query += " AND a.almrin = ?"; params.push(rin); }
-    if (nombre) { 
-      query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)"; 
-      params.push('%' + nombre + '%', '%' + nombre + '%'); 
+    if (nombre) {
+      query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)";
+      params.push('%' + nombre + '%', '%' + nombre + '%');
     }
     if (isGamma === 'true') {
       query += " AND a.almstat = 'G'";
     }
-    
-    if (marca && marca !== 'TODOS' && !nombre) { 
+
+    if (marca && marca !== 'TODOS' && !nombre) {
       const m = marca.toUpperCase();
       if (m === 'INICIO') {
         query += " AND g.grumar IN ('MI','BF','UN','AS')";
@@ -120,28 +147,28 @@ app.get('/api/existencias/search', async (req, res) => {
         else if (m === 'CONTINENTAL') gmar = 'CT';
         else if (m === 'FRONWAY') gmar = 'FW';
         else if (m === 'TOYO') gmar = 'TY';
-        
+
         if (gmar) {
           query += " AND g.grumar = ?";
           params.push(gmar);
         } else {
-          query += " AND a.ALMNOM LIKE ?"; 
+          query += " AND a.ALMNOM LIKE ?";
           params.push('%' + marca + '%');
         }
       }
     }
     query += " GROUP BY a.almcve";
-    
+
     if (conExistencias === 'true') {
       query += " HAVING SUM(IFNULL(s.almstock, 0)) > 0";
     }
-    
+
     query += " ORDER BY g.grudesc, a.almcve LIMIT 2500";
 
     const [rows] = await pool.query(query, params);
     res.json(rows);
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -190,14 +217,14 @@ app.get('/api/pedidos', async (req, res) => {
     query += ' GROUP BY v.VentaId ORDER BY v.VentaId DESC LIMIT 100';
 
     const [rows] = await pool.query(query, params);
-    
+
     const formattedRows = rows.map(r => {
       const subtotal = r.subtotal_num || 0;
       const iva = r.iva_num || 0;
       const total = subtotal + iva;
-      
+
       let statusDesc = 'Desconocido';
-      switch(r.VentaStatus) {
+      switch (r.VentaStatus) {
         case 'S': statusDesc = 'Solicitada'; break;
         case 'F': statusDesc = 'Facturada'; break;
         case 'E': statusDesc = 'Entregada'; break;
@@ -210,7 +237,7 @@ app.get('/api/pedidos', async (req, res) => {
         id: r.id.toString(),
         fecha: r.fecha,
         status: statusDesc,
-        statusDoc: statusDesc, 
+        statusDoc: statusDesc,
         login: r.login,
         cliente: r.cliente,
         ordenVenta: r.ordenVenta ? 'OV-' + r.ordenVenta : '',
@@ -253,7 +280,7 @@ app.get('/api/cotizaciones/:id', async (req, res) => {
     const { id } = req.params;
     const [header] = await pool.query('SELECT * FROM Cotizacion WHERE CotizacionId = ?', [id]);
     const [details] = await pool.query('SELECT * FROM CotizacionDetalle WHERE CotizacionId = ?', [id]);
-    
+
     if (header.length > 0) {
       res.json({ ...header[0], items: details });
     } else {
@@ -268,7 +295,7 @@ app.post('/api/cotizaciones', async (req, res) => {
   const { UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail } = req.body;
   try {
     const d = new Date();
-    const fecha = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const fecha = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const [result] = await pool.query(
       'INSERT INTO Cotizacion (CotizacionFecha, UsuarioLogin, nclicve, nclinom, ncategcve, nclidcred, nclimail) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [fecha, UsuarioLogin, nclicve || 0, nclinom || '', ncategcve || 1, nclidcred || 0, nclimail || '']

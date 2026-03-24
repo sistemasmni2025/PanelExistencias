@@ -15,42 +15,40 @@ const pool = mysql.createPool({
   port: 3306
 });
 
-// --- LOGIN ---
+// --- LOGIN CON COMPATIBILIDAD HEREDADA (GENEXUS) ---
 app.post('/api/login', async (req, res) => {
   const { user, password } = req.body;
   try {
     const cleanUser = (user || '').trim().toUpperCase();
     const cleanPass = (password || '').trim();
     
-    // RASTREADOR DE DIAGNÓSTICO PARA QA
+    // Buscamos al usuario por login (Case-Insensitive)
     const [rows] = await pool.query(
-      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.UsuarioKey FROM usuario u WHERE UPPER(TRIM(u.usuariologin)) = ?",
+      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.SucursalId, s.SucursalAbreviacion as SucursalNombre, u.PerfilId FROM usuario u LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId WHERE UPPER(TRIM(u.usuariologin)) = ?",
       [cleanUser]
     );
 
     if (rows.length > 0) {
       const dbUser = rows[0];
-      // ESTE LOG APARECERÁ EN TU CONSOLA DE NODE
-      console.log('--- DIAGNÓSTICO LOGIN ---');
-      console.log('Usuario:', dbUser.usuariologin);
-      console.log('Key (DB):', dbUser.UsuarioKey);
-      console.log('Password (DB - u.UsuarioPassword):', dbUser.UsuarioPassword);
-      console.log('Pass (DB - u.UsuarioPass):', dbUser.UsuarioPass);
-      console.log('Lo que escribiste:', cleanPass);
-      console.log('-------------------------');
+      const dbPassPlain = (dbUser.UsuarioPass || '').trim(); // Clave en texto plano de la DB
 
-      const dbPass1 = (dbUser.UsuarioPassword || '').trim();
-      const dbPass2 = (dbUser.UsuarioPass || '').trim();
-      
-      const validPasswords = [cleanPass, cleanPass.toUpperCase()];
-      
-      if (validPasswords.includes(dbPass1) || validPasswords.includes(dbPass2)) {
-        res.json({ success: true, user: dbUser });
+      // Lógica de compatibilidad definitiva:
+      // 1. Coincidencia exacta
+      // 2. Coincidencia en MAYÚSCULAS
+      // 3. Coincidencia por truncación (Si la DB tiene 6 chars como '2108jn' y escribes '2108jnAd')
+      const isMatch = 
+        cleanPass === dbPassPlain || 
+        cleanPass.toUpperCase() === dbPassPlain.toUpperCase() ||
+        (dbPassPlain.length >= 6 && cleanPass.startsWith(dbPassPlain)) ||
+        (dbPassPlain.length >= 6 && cleanPass.toUpperCase().startsWith(dbPassPlain.toUpperCase()));
+
+      if (isMatch) {
+         // Limpiamos datos sensibles antes de enviar al front
+         delete dbUser.UsuarioPassword;
+         delete dbUser.UsuarioPass;
+         res.json({ success: true, user: dbUser });
       } else {
-        res.status(401).json({ 
-          success: false, 
-          message: `Contraseña incorrecta. Revisar consola del servidor para diagnóstico (Key: ${dbUser.UsuarioKey || 'S/K'}).` 
-        });
+        res.status(401).json({ success: false, message: 'Contraseña incorrecta.' });
       }
     } else {
       res.status(401).json({ success: false, message: 'El usuario no existe.' });
@@ -60,7 +58,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// --- BÚSQUEDA DE EXISTENCIAS (INCLUYE CAMPAÑAS) ---
+// --- BÚSQUEDA DE EXISTENCIAS (INCLUYE CAMPAÑAS Y DINÁMICA DE SUCURSALES) ---
 app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma } = req.query;
   try {
