@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2 } from 'lucide-react';
+import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2, ArrowLeft } from 'lucide-react';
 import API_BASE_URL from '../../services/apiConfig';
 
 const OrderDetailModal = ({ orderId, onClose }) => {
@@ -211,7 +211,7 @@ const OrderDetailModal = ({ orderId, onClose }) => {
   );
 };
 
-const OrdersGrid = ({ user }) => {
+const OrdersGrid = ({ user, onBack }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -258,13 +258,24 @@ const OrdersGrid = ({ user }) => {
     <div className="w-full relative print:p-0">
       {/* Header Section */}
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 print:hidden">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#002b5e] tracking-tight mb-1">
-            Mis Pedidos
-          </h1>
-          <p className="text-sm font-medium text-slate-500">
-            Administración y seguimiento histórico de requerimientos
-          </p>
+        <div className="flex items-center gap-4">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 bg-white border border-slate-200 text-slate-500 hover:text-[#003d7a] hover:bg-slate-50 hover:border-[#003d7a]/30 rounded-xl transition-all shadow-sm group"
+              title="Regresar a Existencias"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#002b5e] tracking-tight mb-1">
+              Mis Pedidos
+            </h1>
+            <p className="text-sm font-medium text-slate-500">
+              Administración y seguimiento histórico de requerimientos
+            </p>
+          </div>
         </div>
       </div>
 

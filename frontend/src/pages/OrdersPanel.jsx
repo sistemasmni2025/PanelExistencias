@@ -43,11 +43,11 @@ const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout, user }) => 
           </div>
 
           <div className="ml-auto flex items-center gap-6 relative z-10">
-            <div className="h-4 w-px bg-slate-400 hidden sm:block"></div>
+            <div className="h-4 w-px bg-slate-700 hidden sm:block"></div>
             <div className="flex items-center gap-4">
               <div className="hidden md:block text-right">
                 <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Bienvenido(a)</p>
-                <p className="text-[10px] font-bold text-white uppercase tracking-tight leading-none">Administrador</p>
+                <p className="text-[10px] font-bold text-white uppercase tracking-tight leading-none">{user?.UsuarioNombre || 'Consultor'}</p>
               </div>
               <button
                 onClick={onLogout}
@@ -63,7 +63,7 @@ const OrdersPanel = ({ onNavigateHome, onNavigateServices, onLogout, user }) => 
         {/* Scrollable Data Area - Single Scroll System */}
         <div className="flex-1 overflow-auto custom-scrollbar bg-transparent">
           <div className="w-full mx-auto space-y-8 animate-slide-up p-4 sm:p-6 md:p-8 pt-6 sm:pt-8 md:pt-10">
-            <OrdersGrid user={user} />
+            <OrdersGrid user={user} onBack={onNavigateServices} />
           </div>
         </div>
       </main>

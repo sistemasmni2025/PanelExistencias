@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Download, Printer, Share2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { Download, Printer, Share2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, ArrowLeft } from 'lucide-react';
 
-const PrimasFdnPanel = () => {
+const PrimasFdnPanel = ({ onBack }) => {
   const [zoom, setZoom] = useState(100);
 
   const handleZoomIn = () => {
@@ -28,6 +28,18 @@ const PrimasFdnPanel = () => {
       {/* PDF Viewer Interface Simulation */}
       <div className="bg-[#323639] text-white h-12 flex items-center justify-between px-2 md:px-4 shrink-0 shadow-lg z-20">
         <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+          {onBack && (
+            <>
+              <button 
+                onClick={onBack}
+                className="p-1.5 hover:bg-white/10 rounded transition-colors text-slate-300 hover:text-white flex items-center gap-1 group" 
+                title="Regresar a Existencias"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              </button>
+              <div className="hidden sm:block h-4 w-px bg-slate-600"></div>
+            </>
+          )}
           <div className="hidden sm:flex items-center gap-2 truncate">
             <span className="text-xs font-medium text-slate-300 truncate max-w-[150px] md:max-w-none">com.existencias.areporteasociadosgastosb</span>
           </div>

@@ -256,6 +256,18 @@ const ProductModal = ({ product, onClose }) => {
 const ProductCard = ({ product, onAddToCart, onClick }) => {
   const [quantity, setQuantity] = useState(1);
   const [showBranches, setShowBranches] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!showBranches) return;
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowBranches(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showBranches]);
 
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
@@ -338,7 +350,7 @@ const ProductCard = ({ product, onAddToCart, onClick }) => {
         </div>
 
         {/* Inventory */}
-        <div className="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-2 relative z-20">
+        <div className="mt-auto pt-3 border-t border-slate-100 flex flex-col gap-2 relative z-20" ref={dropdownRef}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-slate-600">
               <Package className="w-4 h-4 text-[#ffce00]" />

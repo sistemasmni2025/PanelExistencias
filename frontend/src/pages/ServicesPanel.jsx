@@ -259,7 +259,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
           </>
         ) : activeTab === 'primas_fdn' ? (
           <div className="flex-1 overflow-hidden">
-            <PrimasFdnPanel />
+            <PrimasFdnPanel onBack={() => setActiveTab('existencias')} />
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center bg-slate-50">
