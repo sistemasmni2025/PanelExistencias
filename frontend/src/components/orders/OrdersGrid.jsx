@@ -61,56 +61,56 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                    <span className="text-[#ffce00]">#{data?.header?.id || orderId}</span>
                 </h2>
                 <div className="flex items-center gap-3">
-                   <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">{data?.header?.fecha || 'Consultando...'}</span>
-                   <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                   <span className="text-[10px] font-black text-[#ffce00]/80 uppercase tracking-[0.2em]">{data?.header?.status_desc || 'Procesando'}</span>
-                   <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                   <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Id C: {data?.header?.id_c || '-'}</span>
-                </div>
-             </div>
-          </div>
-
-          <button onClick={onClose} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-all active:scale-90 group">
-            <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
-          </button>
-        </div>
-
-        {/* Tab Navigation Layer */}
-        <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center gap-3">
-          {[
-            { id: 'general', label: 'Información General', icon: Info },
-            { id: 'detalle', label: 'Estructura de Venta', icon: Tag },
-            { id: 'surtimiento', label: 'Logística y Surtimiento', icon: Package }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 group relative overflow-hidden ${
-                activeTab === tab.id 
-                  ? 'bg-[#003d7a] text-white shadow-lg shadow-blue-900/20' 
-                  : 'bg-white border border-slate-200 text-slate-500 hover:border-[#003d7a]/30 hover:text-[#003d7a]'
-              }`}
-            >
-              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[#ffce00]' : 'text-slate-400 group-hover:text-[#003d7a]'}`} />
-              {tab.label}
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
-              )}
-            </button>
-          ))}
-          
-          <div className="ml-auto bg-[#003d7a]/5 border border-[#003d7a]/10 rounded-xl px-4 py-2 hidden md:flex items-center gap-3">
-             <div className="text-right">
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Monto Total Bruto</p>
-                <p className="text-[15px] font-black text-[#003d7a] leading-none">{data?.header?.total || '$0.00'}</p>
-             </div>
-             <div className="w-px h-6 bg-[#003d7a]/10"></div>
-             <Printer 
-               className="w-5 h-5 text-[#003d7a] cursor-pointer hover:scale-110 transition-transform" 
-               onClick={() => window.print()}
-               title="Imprimir Detalle"
-             />
-          </div>
+                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">{data?.header?.fecha || 'Consultando...'}</span>
+                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
+                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">{data?.header?.status || '...'} | {data?.header?.status_desc || 'Procesando'}</span>
+                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
+                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">ID C: {data?.header?.id_c || '-'}</span>
+                 </div>
+              </div>
+           </div>
+ 
+           <button onClick={onClose} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-all active:scale-90 group">
+             <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
+           </button>
+         </div>
+ 
+         {/* Tab Navigation Layer */}
+         <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center gap-3">
+           {[
+             { id: 'general', label: 'Información General', icon: Info },
+             { id: 'detalle', label: 'Estructura de Venta', icon: Tag },
+             { id: 'surtimiento', label: 'Logística y Surtimiento', icon: Package }
+           ].map(tab => (
+             <button
+               key={tab.id}
+               onClick={() => setActiveTab(tab.id)}
+               className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 group relative overflow-hidden ${
+                 activeTab === tab.id 
+                   ? 'bg-[#003d7a] text-white shadow-lg shadow-blue-900/20' 
+                   : 'bg-white border border-slate-200 text-slate-500 hover:border-[#003d7a]/30 hover:text-[#003d7a]'
+               }`}
+             >
+               <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[#ffce00]' : 'text-slate-400 group-hover:text-[#003d7a]'}`} />
+               {tab.label}
+               {activeTab === tab.id && (
+                 <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
+               )}
+             </button>
+           ))}
+           
+           <div className="ml-auto bg-[#003d7a]/5 border border-[#003d7a]/10 rounded-xl px-4 py-2 hidden md:flex items-center gap-3">
+              <div className="text-right">
+                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Monto Total Bruto</p>
+                 <p className="text-[15px] font-black text-[#003d7a] leading-none">{data?.header?.total || '$0.00'}</p>
+              </div>
+              <div className="w-px h-6 bg-[#003d7a]/10"></div>
+              <Printer 
+                className="w-5 h-5 text-[#003d7a] cursor-pointer hover:scale-110 transition-transform" 
+                onClick={() => window.open(`http://multillantasnieto.net:8081/Existencias/servlet/com.existencias.aimprimirorden?VentaId=${data?.header?.id || orderId}`, '_blank')}
+                title="Imprimir Detalle (Sistema Anterior)"
+              />
+           </div>
         </div>
 
         {/* Scrollable Content Area */}
@@ -180,8 +180,8 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                 )}
 
                 {activeTab === 'detalle' && (
-                  <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap">
+                  <div className="rounded-3xl border border-slate-200 overflow-x-auto shadow-sm custom-scrollbar">
+                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap min-w-[1100px]">
                       <thead className="bg-[#003d7a] text-white">
                         <tr>
                           <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Clave</th>
