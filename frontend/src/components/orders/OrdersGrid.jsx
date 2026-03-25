@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2, ArrowLeft, User, MapPin, Hash, Tag, Activity } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import API_BASE_URL from '../../services/apiConfig';
 
 const OrderDetailModal = ({ orderId, onClose }) => {
@@ -25,132 +26,193 @@ const OrderDetailModal = ({ orderId, onClose }) => {
 
   if (!orderId) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex py-10 justify-center px-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white w-full max-w-5xl shadow-2xl relative h-max min-h-[500px]">
-        <button onClick={onClose} className="absolute top-4 right-4 p-1 hover:bg-slate-100 rounded text-slate-500">
-          <X className="w-6 h-6" />
-        </button>
+  const DetailField = ({ label, value, icon: Icon, fullWidth = false }) => (
+    <div className={`p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4 hover:border-brand-blue/30 transition-all ${fullWidth ? 'col-span-full' : ''}`}>
+      <div className="p-2.5 bg-white rounded-xl shadow-sm text-brand-blue">
+        {Icon ? <Icon className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</span>
+        <span className="text-[13px] font-bold text-slate-700 leading-tight truncate max-w-[200px]" title={value}>
+          {value || '-'}
+        </span>
+      </div>
+    </div>
+  );
 
-        <div className="p-6">
-          {/* Header to match screenshot Exactly */}
-          <div className="mb-4 text-slate-800">
-            <h2 className="text-[19px] font-bold mb-1">Venta Information</h2>
-            <p className="text-[13px] text-slate-700">Id C &nbsp;{data?.header?.id_c || orderId}</p>
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 lg:p-8 bg-slate-900/60 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-white rounded-[2rem] w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-slide-up relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header Ribbon - Modern System Layer */}
+        <div className="bg-[#003d7a] px-6 py-4 flex items-center justify-between shadow-lg relative z-20 overflow-hidden">
+          <div className="absolute top-0 right-1/4 w-32 h-32 bg-[#ffce00]/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-[#ffce00]"></div>
+          
+          <div className="flex items-center gap-4 relative z-10">
+             <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
+                <FileText className="w-6 h-6 text-white" />
+             </div>
+             <div>
+                <h2 className="text-white font-black text-lg lg:text-xl uppercase tracking-tight flex items-center gap-3 leading-none mb-1">
+                   Detalle del Registro 
+                   <span className="text-[#ffce00]">#{data?.header?.id || orderId}</span>
+                </h2>
+                <div className="flex items-center gap-3">
+                   <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">{data?.header?.fecha || 'Consultando...'}</span>
+                   <div className="w-1 h-1 rounded-full bg-white/20"></div>
+                   <span className="text-[10px] font-black text-[#ffce00]/80 uppercase tracking-[0.2em]">{data?.header?.status_desc || 'Procesando'}</span>
+                   <div className="w-1 h-1 rounded-full bg-white/20"></div>
+                   <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Id C: {data?.header?.id_c || '-'}</span>
+                </div>
+             </div>
           </div>
 
-          {/* Old System Tabs */}
-          <div className="flex items-end border-b border-black mb-4">
-            {[
-              { id: 'general', label: 'General' },
-              { id: 'detalle', label: 'Detalle' },
-              { id: 'surtimiento', label: 'Surtimiento' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-1.5 text-[13px] font-medium rounded-t-lg mr-1 border border-b-0 border-black transition-none ${
-                  activeTab === tab.id 
-                    ? 'bg-white text-[#b50035] border-t-2 border-t-[#b50035] border-x-black z-10 -mb-[1px]' 
-                    : 'bg-[#2b2b2b] text-white hover:bg-[#3b3b3b]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <button onClick={onClose} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-all active:scale-90 group">
+            <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
+          </button>
+        </div>
 
-          {/* Content */}
-          <div className="px-1 text-[13px] text-slate-700 font-sans pb-10">
+        {/* Tab Navigation Layer */}
+        <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center gap-3">
+          {[
+            { id: 'general', label: 'Información General', icon: Info },
+            { id: 'detalle', label: 'Estructura de Venta', icon: Tag },
+            { id: 'surtimiento', label: 'Logística y Surtimiento', icon: Package }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 group relative overflow-hidden ${
+                activeTab === tab.id 
+                  ? 'bg-[#003d7a] text-white shadow-lg shadow-blue-900/20' 
+                  : 'bg-white border border-slate-200 text-slate-500 hover:border-[#003d7a]/30 hover:text-[#003d7a]'
+              }`}
+            >
+              <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[#ffce00]' : 'text-slate-400 group-hover:text-[#003d7a]'}`} />
+              {tab.label}
+              {activeTab === tab.id && (
+                <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
+              )}
+            </button>
+          ))}
+          
+          <div className="ml-auto bg-[#003d7a]/5 border border-[#003d7a]/10 rounded-xl px-4 py-2 hidden md:flex items-center gap-3">
+             <div className="text-right">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Monto Total Bruto</p>
+                <p className="text-[15px] font-black text-[#003d7a] leading-none">{data?.header?.total || '$0.00'}</p>
+             </div>
+             <div className="w-px h-6 bg-[#003d7a]/10"></div>
+             <Printer 
+               className="w-5 h-5 text-[#003d7a] cursor-pointer hover:scale-110 transition-transform" 
+               onClick={() => window.print()}
+               title="Imprimir Detalle"
+             />
+          </div>
+        </div>
+
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+          <div className="p-8">
             {loading ? (
-              <div className="py-20 text-center text-slate-500">Cargando...</div>
-            ) : data ? (
-              <>
+              <div className="flex flex-col items-center justify-center py-32 gap-4">
+                <Loader2 className="w-12 h-12 text-[#003d7a] animate-spin" />
+                <span className="text-sm font-black text-[#003d7a] uppercase tracking-[0.3em]">Recuperando Estructura...</span>
+              </div>
+            ) : data && data.header ? (
+              <div className="animate-fade-in">
                 {activeTab === 'general' && (
-                  <div className="flex flex-col gap-1.5 max-w-sm">
-                    {[
-                      { label: 'Id', value: data.header.id },
-                      { label: 'Fecha', value: data.header.fecha },
-                      { label: 'Status', value: data.header.status_desc },
-                      { label: 'Login', value: data.header.login },
-                      { label: 'No.Cliente', value: data.header.no_cliente },
-                      { label: 'Orden de Venta', value: data.header.orden_venta },
-                      { label: 'Subtotal', value: data.header.subtotal.replace('$', '') },
-                      { label: 'Iva', value: data.header.iva.replace('$', '') },
-                      { label: 'Total', value: data.header.total.replace('$', '') },
-                      { label: 'Tipo', value: data.header.tipo },
-                      { label: 'Tipo', value: data.header.tipo_bool },
-                      { label: 'Observaciones', value: data.header.observaciones },
-                      { label: 'Id C', value: data.header.id_c },
-                      { label: 'Serie', value: data.header.serie },
-                      { label: 'Factura', value: data.header.factura },
-                      { label: 'Status', value: data.header.status === 'S' ? 'Solicitada' : data.header.status },
-                      { label: 'Solicitud', value: data.header.solicitud },
-                      { label: 'Factura', value: data.header.factura_hora },
-                      { label: 'Almacén', value: data.header.almacen },
-                      { label: 'Entrega', value: data.header.entrega },
-                      { label: 'Recepción', value: data.header.recepcion },
-                      { label: 'Tránsito', value: data.header.transito },
-                      { label: 'Id. Sucursal', value: data.header.sucursal },
-                      { label: 'Ruta', value: data.header.ruta },
-                      { label: 'Vehiculo', value: data.header.vehiculo },
-                      { label: 'Usuario', value: data.header.usuario_nombre, link: true },
-                      { label: 'Observacion', value: data.header.observacion_n },
-                      { label: 'Sucursal', value: data.header.sucursal },
-                      { label: 'Login', value: data.header.login },
-                      { label: 'Usuario Nombre', value: data.header.usuario_nombre },
-                      { label: 'Perfil Id', value: '0' },
-                      { label: 'Recibio', value: data.header.recibio },
-                      { label: 'Surtimiento', value: data.header.surtimiento }
-                    ].map((field, i) => (
-                      <div key={i} className="flex">
-                        <div className="w-[140px] shrink-0 text-slate-500">{field.label}</div>
-                        <div className="flex-1">
-                          {field.link ? (
-                            <span className="text-slate-600 underline cursor-pointer">{field.value}</span>
-                          ) : (
-                            field.value || ''
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <DetailField label="Estatus de Venta" value={data.header.status_desc} icon={Activity} />
+                    <DetailField label="Orden de Venta" value={data.header.orden_venta} icon={Hash} />
+                    <DetailField label="Serie Documento" value={data.header.serie} icon={Hash} />
+                    <DetailField label="Factura Fiscal" value={data.header.factura ? `${data.header.factura}` : 'Pendiente'} icon={FileText} />
+                    <DetailField label="Estatus Solicitud" value={data.header.status === 'S' ? 'SOLICITADA' : data.header.status_desc} icon={CheckCircle2} />
+                    
+                    <div className="col-span-full h-px bg-slate-100 my-4 flex items-center justify-center">
+                       <span className="bg-white px-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Identificación y Cliente</span>
+                    </div>
+
+                    <DetailField label="Nombre del Cliente/Usuario" value={data.header.usuario_nombre} icon={User} />
+                    <DetailField label="ID Login" value={data.header.login} icon={Hash} />
+                    <DetailField label="No. Cliente Interno" value={data.header.no_cliente} icon={Tag} />
+                    <DetailField label="Sucursal" value={data.header.sucursal} icon={MapPin} />
+                    <DetailField label="Perfil ID" value={data.header.perfil_id} icon={Hash} />
+
+                    <div className="col-span-full h-px bg-slate-100 my-4 flex items-center justify-center">
+                       <span className="bg-white px-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Logística y Horarios</span>
+                    </div>
+
+                    <DetailField label="Solicitud Generada" value={data.header.solicitud} icon={Calendar} />
+                    <DetailField label="Facturación" value={data.header.factura_hora} icon={Calendar} />
+                    <DetailField label="Almacén" value={data.header.almacen} icon={Calendar} />
+                    <DetailField label="Recepción" value={data.header.recepcion} icon={Calendar} />
+                    <DetailField label="En Tránsito" value={data.header.transito} icon={Calendar} />
+                    <DetailField label="Entrega Realizada" value={data.header.entrega} icon={MapPin} />
+                    <DetailField label="Ruta de Entrega" value={data.header.ruta} icon={MapPin} />
+                    <DetailField label="Vehículo Asignado" value={data.header.vehiculo} icon={Activity} />
+                    <DetailField label="Recibió Pedido" value={data.header.recibio} icon={User} />
+                    <DetailField label="Nivel Surtimiento" value={data.header.surtimiento} icon={Package} />
+                    
+                    <div className="col-span-full h-px bg-slate-100 my-4 flex items-center justify-center">
+                       <span className="bg-white px-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Resumen Financiero</span>
+                    </div>
+
+                    <div className="col-span-full lg:col-span-2 grid grid-cols-3 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                       <div className="p-4 border-r border-slate-100">
+                          <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Subtotal</p>
+                          <p className="text-xl font-black text-slate-700">{data.header.subtotal}</p>
+                       </div>
+                       <div className="p-4 border-r border-slate-100">
+                          <p className="text-[9px] font-black text-slate-400 uppercase mb-1">IVA (16%)</p>
+                          <p className="text-xl font-black text-slate-700">{data.header.iva}</p>
+                       </div>
+                       <div className="p-4 bg-brand-blue/5">
+                          <p className="text-[9px] font-black text-brand-blue uppercase mb-1">Total Neto</p>
+                          <p className="text-xl font-black text-brand-blue">{data.header.total}</p>
+                       </div>
+                    </div>
+
+                    <DetailField label="Observaciones del Sistema" value={data.header.observaciones || data.header.observacion_n} icon={FileText} fullWidth={true} />
                   </div>
                 )}
 
                 {activeTab === 'detalle' && (
-                  <div className="overflow-x-auto border-t border-slate-300">
-                    <table className="w-full text-left text-[12px] border-collapse whitespace-nowrap">
-                      <thead className="bg-[#b50035] text-white">
+                  <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap">
+                      <thead className="bg-[#003d7a] text-white">
                         <tr>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Clave</th>
-                          <th className="px-2 py-1.5 font-semibold border-r border-[#95002a]">Descripción</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Iva</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Cantidad</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Venta</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Iva Importe</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detalle Subtotal</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Costo</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">P. Lista</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detalle Original</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Detallemfdescncp</th>
-                          <th className="px-2 py-1.5 font-semibold text-center">Detalle PVN</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Clave</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Descripción del Artículo</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">IVA</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">Cant.</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">P. Venta</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">IVA Imp.</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">Subtotal</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">Costo</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">P. Lista</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">Orig.</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">Desc. NCP</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right">PVN</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {data.items.map((item, i) => (
-                          <tr key={i} className="border-b border-slate-100/50 hover:bg-slate-50">
-                            <td className="px-2 py-1 text-slate-700 text-center">{item.clave}</td>
-                            <td className="px-2 py-1 text-slate-600">{item.descripcion}</td>
-                            <td className="px-2 py-1 text-slate-700 text-center">{item.iva}</td>
-                            <td className="px-2 py-1 text-slate-900 text-right">{item.cantidad}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.venta.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.iva_importe.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.subtotal.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.costo.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.p_lista.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.original}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.mfdescncp.replace('$', '')}</td>
-                            <td className="px-2 py-1 text-slate-700 text-right">{item.pvn.replace('$', '')}</td>
+                      <tbody className="divide-y divide-slate-100">
+                        {(data.items || []).map((item, i) => (
+                          <tr key={i} className="hover:bg-slate-50 transition-colors group">
+                            <td className="px-4 py-2.5 text-slate-700 font-black group-hover:text-brand-blue transition-colors uppercase">{item.clave}</td>
+                            <td className="px-4 py-2.5 text-slate-600 font-bold whitespace-normal min-w-[200px]">{item.descripcion}</td>
+                            <td className="px-4 py-2.5 text-slate-400 text-center font-black">{item.iva}</td>
+                            <td className="px-4 py-2.5 text-[#003d7a] text-center font-black">{item.cantidad}</td>
+                            <td className="px-4 py-2.5 text-slate-700 text-right font-black">{item.venta?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-slate-500 text-right font-bold">{item.iva_importe?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-brand-blue text-right font-black">{item.subtotal?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-slate-400 text-right font-bold italic">{item.costo?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-slate-500 text-right font-bold">{item.p_lista?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-slate-400 text-center font-bold">{item.original}</td>
+                            <td className="px-4 py-2.5 text-brand-red text-right font-bold">{item.mfdescncp?.replace('$', '') || ''}</td>
+                            <td className="px-4 py-2.5 text-slate-800 text-right font-black">{item.pvn?.replace('$', '') || ''}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -159,55 +221,94 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                 )}
 
                 {activeTab === 'surtimiento' && (
-                  <div className="overflow-x-auto border-t border-slate-300">
-                    <table className="w-full text-left text-[12px] border-collapse whitespace-nowrap">
-                      <thead className="bg-[#b50035] text-white">
+                  <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap">
+                      <thead className="bg-brand-red text-white">
                         <tr>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Clave</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Actual</th>
-                          <th className="px-2 py-1.5 font-semibold border-r border-[#95002a]">Nombre</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Terminado</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Pedido</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Porcentaje Inicial</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Porcentaje Actual</th>
-                          <th className="px-2 py-1.5 font-semibold text-center border-r border-[#95002a]">Marca</th>
-                          <th className="px-2 py-1.5 font-semibold text-center">Grupo</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Clave</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-right border-r border-white/10">Actual</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Nombre del Producto</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">Terminado</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">Pedido</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">% Inicial</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">% Actual</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Marca</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center border-r border-white/10">Grupo</th>
+                          <th className="px-4 py-3 font-black uppercase tracking-widest text-center">Progreso</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {data.surtimiento.map((st, i) => (
-                          <tr key={i} className="border-b border-slate-100/50 hover:bg-slate-50">
-                            <td className="px-2 py-1 text-slate-700 text-center">{st.clave}</td>
-                            <td className="px-2 py-1 text-slate-900 text-right">{st.actual}</td>
-                            <td className="px-2 py-1 text-slate-600">{st.nombre}</td>
-                            <td className="px-2 py-1 text-center">
+                      <tbody className="divide-y divide-slate-100">
+                        {(data.surtimiento || []).map((st, i) => (
+                          <tr key={i} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-4 py-2.5 text-slate-700 font-black uppercase">{st.clave}</td>
+                            <td className="px-4 py-2.5 text-slate-900 text-right font-black">{st.actual}</td>
+                            <td className="px-4 py-2.5 text-slate-600 font-bold whitespace-normal min-w-[150px]">{st.nombre}</td>
+                            <td className="px-4 py-2.5 text-center">
                               {st.terminado ? (
-                                <div className="w-3.5 h-3.5 mx-auto bg-slate-200 border border-slate-300 rounded-sm flex items-center justify-center">
-                                  <svg className="w-3 h-3 text-white fill-current" viewBox="0 0 20 20"><path d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>
-                                </div>
+                                <div className="p-1 bg-green-100 text-green-600 rounded-lg inline-flex"><CheckCircle2 className="w-4 h-4" /></div>
                               ) : (
-                                <div className="w-3.5 h-3.5 mx-auto bg-white border border-slate-300 rounded-sm"></div>
+                                <div className="p-1 bg-slate-100 text-slate-400 rounded-lg inline-flex"><Loader2 className="w-4 h-4 animate-spin-slow" /></div>
                               )}
                             </td>
-                            <td className="px-2 py-1 text-slate-900 text-center">{st.pedido}</td>
-                            <td className="px-2 py-1 text-slate-900 text-center">{st.porcentaje_inicial}</td>
-                            <td className="px-2 py-1 text-slate-900 text-center">{st.porcentaje_inicial}</td>
-                            <td className="px-2 py-1 text-slate-700 text-center">{st.marca}</td>
-                            <td className="px-2 py-1 text-slate-700 text-center">{st.grupo}</td>
+                            <td className="px-4 py-2.5 text-slate-700 text-center font-black">{st.pedido}</td>
+                            <td className="px-4 py-2.5 text-slate-500 text-center font-bold px-4">{st.porcentaje_inicial}%</td>
+                            <td className="px-4 py-2.5 text-brand-blue text-center font-black px-4">{st.porcentaje_actual || st.porcentaje_inicial}%</td>
+                            <td className="px-4 py-2.5 text-slate-500 text-center font-bold tracking-tighter">{st.marca}</td>
+                            <td className="px-4 py-2.5 text-slate-400 text-center font-medium">{st.grupo}</td>
+                            <td className="px-4 py-2.5 text-center">
+                               <div className="flex items-center gap-2 justify-center min-w-[100px]">
+                                  <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                                     <div 
+                                       className={`h-full transition-all duration-1000 ${st.terminado ? 'bg-green-500' : 'bg-brand-blue'}`}
+                                       style={{ width: `${st.porcentaje_actual || st.porcentaje_inicial}%` }}
+                                     ></div>
+                                  </div>
+                               </div>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                 )}
-              </>
+              </div>
             ) : (
-              <div className="py-20 text-slate-500">Error cargando detalles.</div>
+              <div className="py-24 flex flex-col items-center justify-center text-center animate-fade-in">
+                <div className="p-6 bg-red-50 rounded-full text-red-600 mb-6 animate-bounce">
+                   <Package className="w-16 h-16" />
+                </div>
+                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Error de Sincronización</h3>
+                <p className="text-slate-500 max-w-md mx-auto mb-8 font-medium">
+                   No pudimos recuperar la estructura técnica de este registro. El servidor respondió con el siguiente mensaje:
+                </p>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl overflow-x-auto max-w-lg w-full">
+                   <code className="text-pink-400 text-sm font-mono block text-left">
+                      {data?.error || 'Excepción no controlada en el núcleo del sistema.'}
+                   </code>
+                </div>
+                <button 
+                  onClick={onClose}
+                  className="mt-8 px-8 py-3 bg-slate-800 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-slate-700 transition-all shadow-xl active:scale-95"
+                >
+                   Entendido
+                </button>
+              </div>
             )}
           </div>
         </div>
+        
+        {/* Footer Area */}
+        <div className="px-8 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
+           <div className="flex items-center gap-6">
+              <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-brand-blue"></div> Datos Certificados</span>
+              <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div> Conexión Segura (DB)</span>
+           </div>
+           <p>© 2026 Multillantas Nieto S.A de C.V</p>
+        </div>
+
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

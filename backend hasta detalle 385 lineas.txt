@@ -15,42 +15,37 @@ const pool = mysql.createPool({
   port: 3306
 });
 
-// --- LOGIN ---
+// --- LOGIN CON COMPATIBILIDAD HEREDADA (GENEXUS) ---
 app.post('/api/login', async (req, res) => {
   const { user, password } = req.body;
   try {
     const cleanUser = (user || '').trim().toUpperCase();
     const cleanPass = (password || '').trim();
     
-    // RASTREADOR DE DIAGNÓSTICO PARA QA
+    // Buscamos al usuario por login (Case-Insensitive)
     const [rows] = await pool.query(
-      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.UsuarioKey FROM usuario u WHERE UPPER(TRIM(u.usuariologin)) = ?",
+      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.SucursalId, s.SucursalAbreviacion as SucursalNombre, u.PerfilId FROM usuario u LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId WHERE UPPER(TRIM(u.usuariologin)) = ?",
       [cleanUser]
     );
 
     if (rows.length > 0) {
       const dbUser = rows[0];
-      // ESTE LOG APARECERÁ EN TU CONSOLA DE NODE
-      console.log('--- DIAGNÓSTICO LOGIN ---');
-      console.log('Usuario:', dbUser.usuariologin);
-      console.log('Key (DB):', dbUser.UsuarioKey);
-      console.log('Password (DB - u.UsuarioPassword):', dbUser.UsuarioPassword);
-      console.log('Pass (DB - u.UsuarioPass):', dbUser.UsuarioPass);
-      console.log('Lo que escribiste:', cleanPass);
-      console.log('-------------------------');
+      const dbPassPlain = (dbUser.UsuarioPass || '').trim(); // Clave en texto plano de la DB
 
-      const dbPass1 = (dbUser.UsuarioPassword || '').trim();
-      const dbPass2 = (dbUser.UsuarioPass || '').trim();
-      
-      const validPasswords = [cleanPass, cleanPass.toUpperCase()];
-      
-      if (validPasswords.includes(dbPass1) || validPasswords.includes(dbPass2)) {
-        res.json({ success: true, user: dbUser });
+      // Lógica de compatibilidad definitiva:
+      const isMatch = 
+        cleanPass === dbPassPlain || 
+        cleanPass.toUpperCase() === dbPassPlain.toUpperCase() ||
+        (dbPassPlain.length >= 6 && cleanPass.startsWith(dbPassPlain)) ||
+        (dbPassPlain.length >= 6 && cleanPass.toUpperCase().startsWith(dbPassPlain.toUpperCase()));
+
+      if (isMatch) {
+         // Limpiamos datos sensibles antes de enviar al front
+         delete dbUser.UsuarioPassword;
+         delete dbUser.UsuarioPass;
+         res.json({ success: true, user: dbUser });
       } else {
-        res.status(401).json({ 
-          success: false, 
-          message: `Contraseña incorrecta. Revisar consola del servidor para diagnóstico (Key: ${dbUser.UsuarioKey || 'S/K'}).` 
-        });
+        res.status(401).json({ success: false, message: 'Contraseña incorrecta.' });
       }
     } else {
       res.status(401).json({ success: false, message: 'El usuario no existe.' });
@@ -60,7 +55,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// --- BÚSQUEDA DE EXISTENCIAS (INCLUYE CAMPAÑAS) ---
+// --- BÚSQUEDA DE EXISTENCIAS (INCLUYE CAMPAÑAS Y DINÁMICA DE SUCURSALES) ---
 app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma } = req.query;
   try {
@@ -234,29 +229,12 @@ app.get('/api/pedidos', async (req, res) => {
       let statusDoc = 'En Captura';
 
       switch (r.VentaStatus) {
-        case 'S':
-          statusBadge = 'SOLICITADA';
-          statusDoc = 'En Captura';
-          break;
-        case 'F':
-          statusBadge = 'FACTURADA';
-          statusDoc = 'Facturado';
-          break;
-        case 'E':
-          statusBadge = 'ENTREGADA';
-          statusDoc = 'Entregado';
-          break;
-        case 'T':
-          statusBadge = 'EN TRANSITO';
-          statusDoc = 'En Transito';
-          break;
-        case 'R':
-          statusBadge = 'RECEPCION';
-          statusDoc = 'Recepción Almacén';
-          break;
-        default:
-          statusBadge = r.VentaStatus || 'N/A';
-          statusDoc = r.VentaStatus || 'Procesando';
+        case 'S': statusBadge = 'SOLICITADA'; statusDoc = 'En Captura'; break;
+        case 'F': statusBadge = 'FACTURADA'; statusDoc = 'Facturado'; break;
+        case 'E': statusBadge = 'ENTREGADA'; statusDoc = 'Entregado'; break;
+        case 'T': statusBadge = 'EN TRANSITO'; statusDoc = 'En Transito'; break;
+        case 'R': statusBadge = 'RECEPCION'; statusDoc = 'Recepción Almacén'; break;
+        default: statusBadge = r.VentaStatus || 'N/A'; statusDoc = r.VentaStatus || 'Procesando';
       }
 
       const formatCurrency = (val) => {
@@ -293,32 +271,23 @@ app.get('/api/pedidos/:id', async (req, res) => {
   try {
     const [headerRows] = await pool.query(`
       SELECT 
-        v.*,
-        DATE_FORMAT(v.VentaFecha, '%d/%m/%Y') as fecha_fmt,
-        DATE_FORMAT(v.VentaHoraSolicitud, '%d/%m/%Y %h:%i %p') as solicitud_fmt,
-        DATE_FORMAT(v.VentaHoraFactura, '%d/%m/%Y %h:%i %p') as factura_fmt,
-        DATE_FORMAT(v.VentaHoraAlmacen, '%d/%m/%Y %h:%i %p') as almacen_fmt,
-        DATE_FORMAT(v.VentaHoraEntrega, '%d/%m/%Y %h:%i %p') as entrega_fmt,
-        DATE_FORMAT(v.VentaHoraRecepcion, '%d/%m/%Y %h:%i %p') as recepcion_fmt,
-        DATE_FORMAT(v.VentaHoraTransito, '%d/%m/%Y %h:%i %p') as transito_fmt,
-        u.UsuarioNombre as cliente_nombre,
-        u.PerfilId as perfil_id,
-        v.UsuarioLogin as no_cliente,
-        s.SucursalAbreviacion as sucursal_nombre
+        v.*, DATE_FORMAT(v.VentaFecha, '%d/%m/%Y') as fecha_fmt, DATE_FORMAT(v.VentaHoraSolicitud, '%d/%m/%Y %h:%i %p') as solicitud_fmt,
+        DATE_FORMAT(v.VentaHoraFactura, '%d/%m/%Y %h:%i %p') as factura_fmt, DATE_FORMAT(v.VentaHoraAlmacen, '%d/%m/%Y %h:%i %p') as almacen_fmt,
+        DATE_FORMAT(v.VentaHoraEntrega, '%d/%m/%Y %h:%i %p') as entrega_fmt, DATE_FORMAT(v.VentaHoraRecepcion, '%d/%m/%Y %h:%i %p') as recepcion_fmt,
+        DATE_FORMAT(v.VentaHoraTransito, '%d/%m/%Y %h:%i %p') as transito_fmt, u.UsuarioNombre as cliente_nombre, u.PerfilId as perfil_id,
+        v.UsuarioLogin as no_cliente, s.SucursalAbreviacion as sucursal_nombre
       FROM venta v
       LEFT JOIN usuario u ON v.UsuarioLogin = u.usuariologin
-      LEFT JOIN sucursal s ON v.SucursalId = s.SucursalId
+      LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId
       WHERE v.VentaId = ?
     `, [id]);
 
     if (headerRows.length === 0) return res.status(404).json({ error: 'No encontrado' });
     const h = headerRows[0];
-
     const [detailRows] = await pool.query(`SELECT vd.*, a.ALMNOM as descrip, a.almplist as plist FROM ventadetalle vd LEFT JOIN almcat a ON vd.almcve = a.almcve WHERE vd.VentaId = ?`, [id]);
     const [surtRows] = await pool.query(`SELECT vs.*, a.ALMNOM as nom, g.grumar as mar, g.grucve as gru FROM ventasurtimiento vs LEFT JOIN almcat a ON vs.SurtimientoClave = a.almcve LEFT JOIN almgru g ON a.grucve = g.grucve WHERE vs.VentaId = ?`, [id]);
 
     const formatCurrency = (val) => (parseFloat(val) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
     let st = 0, it = 0;
     const items = detailRows.map(d => {
       const imp = (d.VentaDetalleCan || 0) * (parseFloat(d.VentaDetallePV) || 0);
@@ -335,26 +304,25 @@ app.get('/api/pedidos/:id', async (req, res) => {
 
     res.json({
       header: {
-        id: h.VentaId, fecha: h.fecha_fmt, status: h.VentaStatus, login: h.UsuarioLogin, no_cliente: h.no_cliente,
+        id: h.VentaId, fecha: h.fecha_fmt, status: h.VentaStatus, login: h.UsuarioLogin, no_cliente: h.no_cliente, 
         orden_venta: h.VentaOrden, subtotal: '$' + formatCurrency(st), iva: '$' + formatCurrency(it), total: '$' + formatCurrency(st + it),
         tipo: h.VentaTipo, tipo_bool: h.VentaStatusTipo ? 'true' : 'false', observaciones: h.VentaObservaciones, id_c: h.VentaIdC,
         serie: h.VentaSerie, factura: h.VentaFactura, status_desc: h.VentaStatusInterno || 'N/A',
         solicitud: h.solicitud_fmt || '-', factura_hora: h.factura_fmt || '-', almacen: h.almacen_fmt || '-',
         entrega: h.entrega_fmt || '-', recepcion: h.recepcion_fmt || '-', transito: h.transito_fmt || '-',
         ruta: h.VentaRuta || '-', vehiculo: h.VentaVehiculo || '-', usuario_nombre: h.cliente_nombre,
-        perfil_id: h.perfil_id || '0',
-        observacion_n: h.VentaObservacion, sucursal: h.sucursal_nombre, recibio: h.VentaRecibio || '-', surtimiento: h.VentaSurtimiento || '0'
+        perfil_id: h.perfil_id || '0', observacion_n: h.VentaObservacion, sucursal: h.sucursal_nombre,
+        recibio: h.VentaRecibio || '-', surtimiento: h.VentaSurtimiento || '0'
       },
       items,
       surtimiento: surtRows.map(s => ({
         clave: s.SurtimientoClave, actual: s.SurtimientoActual, nombre: s.nom,
         terminado: s.SurtimientoTerminado === 1, pedido: s.SurtimientoPedido,
-        porcentaje_inicial: s.SurtimientoPorcentajeInicial,
-        porcentaje_actual: s.SurtimientoPorcentajeActual,
+        porcentaje_inicial: s.SurtimientoPorcentajeInicial, porcentaje_actual: s.SurtimientoPorcentajeActual,
         marca: s.mar, grupo: s.gru
       }))
     });
   } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-app.listen(4000, '0.0.0.0', () => console.log('API Multillantas Nieto corriendo en puerto 4000'));
+app.listen(4000, '0.0.0.0', () => console.log('API Multillantas Nieto corriendo en puerto 4000 (v385 lines)'));
