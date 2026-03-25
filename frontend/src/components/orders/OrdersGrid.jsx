@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2, ArrowLeft, User, MapPin, Hash, Tag, Activity } from 'lucide-react';
+import { Search, Calendar, ChevronDown, Filter, FileText, Download, Loader2, Printer, X, Package, Info, CheckCircle2, ArrowLeft, User, MapPin, Hash, Tag, Activity, FileCode } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import API_BASE_URL from '../../services/apiConfig';
 
@@ -27,13 +27,13 @@ const OrderDetailModal = ({ orderId, onClose }) => {
   if (!orderId) return null;
 
   const DetailField = ({ label, value, icon: Icon, fullWidth = false }) => (
-    <div className={`p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4 hover:border-brand-blue/30 transition-all ${fullWidth ? 'col-span-full' : ''}`}>
-      <div className="p-2.5 bg-white rounded-xl shadow-sm text-brand-blue">
-        {Icon ? <Icon className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+    <div className={`p-3 lg:p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4 hover:border-brand-blue/30 transition-all ${fullWidth ? 'col-span-full' : ''}`}>
+      <div className="p-2 lg:p-2.5 bg-white rounded-xl shadow-sm text-brand-blue">
+        {Icon ? <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> : <Info className="w-3.5 h-3.5 lg:w-4 lg:h-4" />}
       </div>
       <div className="flex flex-col">
         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</span>
-        <span className="text-[13px] font-bold text-slate-700 leading-tight truncate max-w-[200px]" title={value}>
+        <span className="text-[13px] font-bold text-slate-700 leading-tight whitespace-normal break-words" title={value}>
           {value || '-'}
         </span>
       </div>
@@ -47,75 +47,78 @@ const OrderDetailModal = ({ orderId, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Ribbon - Modern System Layer */}
-        <div className="bg-[#003d7a] px-6 py-4 flex items-center justify-between shadow-lg relative z-20 overflow-hidden">
+        <div className="bg-[#003d7a] px-5 lg:px-6 py-3 lg:py-4 flex items-center justify-between shadow-lg relative z-20 overflow-hidden shrink-0">
           <div className="absolute top-0 right-1/4 w-32 h-32 bg-[#ffce00]/10 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-full h-1 bg-[#ffce00]"></div>
           
-          <div className="flex items-center gap-4 relative z-10">
-             <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
-                <FileText className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 lg:gap-4 relative z-10">
+             <div className="p-2 lg:p-3 bg-white/10 rounded-xl lg:rounded-2xl backdrop-blur-md border border-white/20">
+                <FileText className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
              </div>
              <div>
-                <h2 className="text-white font-black text-lg lg:text-xl uppercase tracking-tight flex items-center gap-3 leading-none mb-1">
+                <h2 className="text-white font-black text-[11px] sm:text-base lg:text-xl uppercase tracking-tight flex items-center gap-2 lg:gap-3 leading-none mb-1.5">
                    Detalle del Registro 
                    <span className="text-[#ffce00]">#{data?.header?.id || orderId}</span>
                 </h2>
-                <div className="flex items-center gap-3">
-                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">{data?.header?.fecha || 'Consultando...'}</span>
-                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">{data?.header?.status || '...'} | {data?.header?.status_desc || 'Procesando'}</span>
-                    <div className="w-1 h-1 rounded-full bg-white/20"></div>
-                    <span className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider shadow-sm">ID C: {data?.header?.id_c || '-'}</span>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 lg:gap-3">
+                    <span className="bg-red-600/90 text-white text-[7px] lg:text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">{data?.header?.fecha || '...'}</span>
+                    <div className="hidden sm:block w-0.5 h-0.5 rounded-full bg-white/20"></div>
+                    <span className="bg-red-600/90 text-white text-[7px] lg:text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">{data?.header?.status || '...'} | {data?.header?.status_desc || '...'}</span>
+                    <div className="hidden sm:block w-0.5 h-0.5 rounded-full bg-white/20"></div>
+                    <span className="bg-red-600/90 text-white text-[7px] lg:text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider">ID C: {data?.header?.id_c || '-'}</span>
                  </div>
               </div>
            </div>
- 
-           <button onClick={onClose} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-all active:scale-90 group">
-             <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
+
+           <button onClick={onClose} className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10 p-2 lg:p-2.5 rounded-xl lg:rounded-2xl transition-all active:scale-90 group">
+             <X className="w-5 h-5 lg:w-6 lg:h-6 group-hover:rotate-90 transition-transform duration-300" />
            </button>
-         </div>
- 
-         {/* Tab Navigation Layer */}
-         <div className="bg-slate-50/50 px-8 py-4 border-b border-slate-100 flex items-center gap-3">
-           {[
-             { id: 'general', label: 'Información General', icon: Info },
-             { id: 'detalle', label: 'Estructura de Venta', icon: Tag },
-             { id: 'surtimiento', label: 'Logística y Surtimiento', icon: Package }
-           ].map(tab => (
-             <button
-               key={tab.id}
-               onClick={() => setActiveTab(tab.id)}
-               className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 group relative overflow-hidden ${
-                 activeTab === tab.id 
-                   ? 'bg-[#003d7a] text-white shadow-lg shadow-blue-900/20' 
-                   : 'bg-white border border-slate-200 text-slate-500 hover:border-[#003d7a]/30 hover:text-[#003d7a]'
-               }`}
-             >
-               <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-[#ffce00]' : 'text-slate-400 group-hover:text-[#003d7a]'}`} />
-               {tab.label}
-               {activeTab === tab.id && (
-                 <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
-               )}
-             </button>
-           ))}
-           
-           <div className="ml-auto bg-[#003d7a]/5 border border-[#003d7a]/10 rounded-xl px-4 py-2 hidden md:flex items-center gap-3">
-              <div className="text-right">
-                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Monto Total Bruto</p>
-                 <p className="text-[15px] font-black text-[#003d7a] leading-none">{data?.header?.total || '$0.00'}</p>
+        </div>
+
+        {/* Navigation & Total Bar - Compact Context Area */}
+        <div className="bg-slate-50/50 px-3 lg:px-8 py-2 lg:py-4 border-b border-slate-100 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 lg:gap-6 shrink-0 overflow-hidden">
+           {/* Tab Switches */}
+           <div className="flex items-center gap-1.5 lg:gap-3 overflow-x-auto custom-scrollbar no-scrollbar flex-1 whitespace-nowrap">
+             {[
+               { id: 'general', label: 'Información General', icon: Info },
+               { id: 'detalle', label: 'Estructura de Venta', icon: Tag },
+               { id: 'surtimiento', label: 'Logística y Surtimiento', icon: Package }
+             ].map(tab => (
+               <button
+                 key={tab.id}
+                 onClick={() => setActiveTab(tab.id)}
+                 className={`px-3 lg:px-5 py-1.5 lg:py-2.5 text-[8px] lg:text-[11px] font-black uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 flex-shrink-0 group relative overflow-hidden ${
+                   activeTab === tab.id 
+                     ? 'bg-[#003d7a] text-white shadow-lg shadow-blue-900/20' 
+                     : 'bg-white border border-slate-200 text-slate-500 hover:border-[#003d7a]/30 hover:text-[#003d7a]'
+                 }`}
+               >
+                 <tab.icon className={`w-3 lg:w-4 h-3 lg:h-4 ${activeTab === tab.id ? 'text-[#ffce00]' : 'text-slate-400 group-hover:text-[#003d7a]'}`} />
+                 {tab.label}
+               </button>
+             ))}
+           </div>
+
+           {/* Quick Financial Summary Indicator */}
+           <div className="w-full lg:w-auto ml-0 lg:ml-auto bg-[#003d7a]/5 border border-[#003d7a]/10 rounded-xl px-3 py-1.5 flex items-center justify-between lg:justify-end gap-3 lg:gap-4 shrink-0 mt-1 lg:mt-0">
+              <div className="text-left lg:text-right">
+                 <p className="text-[6px] lg:text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Monto Total</p>
+                 <p className="text-[13px] lg:text-[15px] font-black text-[#003d7a] leading-none">{data?.header?.total || '$0.00'}</p>
               </div>
               <div className="w-px h-6 bg-[#003d7a]/10"></div>
-              <Printer 
-                className="w-5 h-5 text-[#003d7a] cursor-pointer hover:scale-110 transition-transform" 
+              <button
                 onClick={() => window.open(`http://multillantasnieto.net:8081/Existencias/servlet/com.existencias.aimprimirorden?VentaId=${data?.header?.id || orderId}`, '_blank')}
+                className="p-1.5 lg:p-2 bg-white rounded-lg border border-[#003d7a]/10 flex items-center justify-center hover:bg-[#003d7a] hover:text-white transition-all shadow-sm active:scale-90 group"
                 title="Imprimir Detalle (Sistema Anterior)"
-              />
+              >
+                <Printer className="w-4 lg:w-5 h-4 lg:h-5 text-[#003d7a] group-hover:text-white transition-colors" />
+              </button>
            </div>
         </div>
 
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
-          <div className="p-8">
+          <div className="p-4 lg:p-8">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-32 gap-4">
                 <Loader2 className="w-12 h-12 text-[#003d7a] animate-spin" />
@@ -139,7 +142,7 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                     <DetailField label="ID Login" value={data.header.login} icon={Hash} />
                     <DetailField label="No. Cliente Interno" value={data.header.no_cliente} icon={Tag} />
                     <DetailField label="Sucursal" value={data.header.sucursal} icon={MapPin} />
-                    <DetailField label="Perfil ID" value={data.header.perfil_id} icon={Hash} />
+                    {/* <DetailField label="Perfil ID" value={data.header.perfil_id} icon={Hash} /> */}
 
                     <div className="col-span-full h-px bg-slate-100 my-4 flex items-center justify-center">
                        <span className="bg-white px-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Logística y Horarios</span>
@@ -160,18 +163,18 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                        <span className="bg-white px-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Resumen Financiero</span>
                     </div>
 
-                    <div className="col-span-full lg:col-span-2 grid grid-cols-3 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
-                       <div className="p-4 border-r border-slate-100">
+                    <div className="col-span-full lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                       <div className="p-4 border-b sm:border-b-0 sm:border-r border-slate-100">
                           <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Subtotal</p>
-                          <p className="text-xl font-black text-slate-700">{data.header.subtotal}</p>
+                          <p className="text-base sm:text-xl font-black text-slate-700">{data.header.subtotal}</p>
                        </div>
-                       <div className="p-4 border-r border-slate-100">
+                       <div className="p-4 border-b sm:border-b-0 sm:border-r border-slate-100">
                           <p className="text-[9px] font-black text-slate-400 uppercase mb-1">IVA (16%)</p>
-                          <p className="text-xl font-black text-slate-700">{data.header.iva}</p>
+                          <p className="text-base sm:text-xl font-black text-slate-700">{data.header.iva}</p>
                        </div>
                        <div className="p-4 bg-brand-blue/5">
                           <p className="text-[9px] font-black text-brand-blue uppercase mb-1">Total Neto</p>
-                          <p className="text-xl font-black text-brand-blue">{data.header.total}</p>
+                          <p className="text-base sm:text-xl font-black text-brand-blue">{data.header.total}</p>
                        </div>
                     </div>
 
@@ -221,8 +224,8 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                 )}
 
                 {activeTab === 'surtimiento' && (
-                  <div className="rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap">
+                  <div className="rounded-3xl border border-slate-200 overflow-x-auto shadow-sm custom-scrollbar">
+                    <table className="w-full text-left text-[11px] border-collapse whitespace-nowrap min-w-[1000px]">
                       <thead className="bg-brand-red text-white">
                         <tr>
                           <th className="px-4 py-3 font-black uppercase tracking-widest border-r border-white/10">Clave</th>
@@ -263,7 +266,7 @@ const OrderDetailModal = ({ orderId, onClose }) => {
                                        style={{ width: `${st.porcentaje_actual || st.porcentaje_inicial}%` }}
                                      ></div>
                                   </div>
-                               </div>
+                                </div>
                             </td>
                           </tr>
                         ))}
@@ -298,12 +301,8 @@ const OrderDetailModal = ({ orderId, onClose }) => {
         </div>
         
         {/* Footer Area */}
-        <div className="px-8 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">
-           <div className="flex items-center gap-6">
-              <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-brand-blue"></div> Datos Certificados</span>
-              <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div> Conexión Segura (DB)</span>
-           </div>
-           <p>© 2026 Multillantas Nieto S.A de C.V</p>
+        <div className="px-6 lg:px-8 py-4 lg:py-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 gap-3 sm:gap-0">
+           <p className="text-center sm:text-right">© 2026 Multillantas Nieto S.A de C.V</p>
         </div>
 
       </div>
@@ -438,7 +437,7 @@ const OrdersGrid = ({ user, onBack }) => {
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Subtotal</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">IVA</div>
             <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-right">Total</div>
-            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-center">Imprimir</div>
+            <div className="text-[9px] font-black text-white/90 uppercase tracking-widest print:text-black text-center">PDF / XML</div>
           </div>
         </div>
 
@@ -465,30 +464,94 @@ const OrdersGrid = ({ user, onBack }) => {
                 <div className="text-xs font-bold text-slate-600 text-right">{order.subtotal}</div>
                 <div className="text-xs font-bold text-slate-400 text-right">{order.iva}</div>
                 <div className="text-xs font-black text-[#003d7a] text-right">{order.total}</div>
-                <div className="flex items-center justify-center print:hidden">
-                  <button onClick={() => window.print()} className="p-2 text-slate-400 hover:text-[#003d7a] hover:bg-slate-200 rounded-lg transition-colors cursor-pointer" title="Imprimir Requerimiento">
-                    <Printer className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-center gap-2 print:hidden">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fNum = order.factura ? order.factura.replace('F-', '').trim() : order.id;
+                        const serie = order.serie || 'MLLNI';
+                        window.open(`http://multillantasnieto.net:8081/Invoice33ext/mllni/fac/pdf/Factura${serie}${fNum}.pdf`, '_blank');
+                      }} 
+                      className="px-2 py-1 bg-red-50 text-red-600 border border-red-100 font-black text-[9px] rounded-md transition-all hover:bg-red-600 hover:text-white hover:border-red-600 active:scale-90 flex items-center gap-1.5 shadow-sm group" 
+                      title="Descargar PDF"
+                    >
+                      <FileText className="w-3.5 h-3.5" /> PDF
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fNum = order.factura ? order.factura.replace('F-', '').trim() : order.id;
+                        const serie = order.serie || 'MLLNI';
+                        window.open(`http://multillantasnieto.net:8081/Invoice33ext/mllni/fac/xml/Factura${serie}${fNum}xml.tgz`, '_blank');
+                      }} 
+                      className="px-2 py-1 bg-blue-50 text-blue-600 border border-blue-100 font-black text-[9px] rounded-md transition-all hover:bg-blue-600 hover:text-white hover:border-blue-600 active:scale-90 flex items-center gap-1.5 shadow-sm group" 
+                      title="Descargar XML"
+                    >
+                      <FileCode className="w-3.5 h-3.5" /> XML
+                    </button>
                 </div>
               </div>
             )})}
           </div>
         </div>
 
-        {/* MOBILE VIEW (Unchanged but ensuring it works) */}
-        <div className="md:hidden divide-y divide-slate-100">
-          {orders.map((order, idx) => (
-            <div key={idx} className="p-4" onClick={() => setSelectedOrderId(order.id)}>
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex flex-col">
-                  <span className="text-sm font-black text-[#003d7a]">#{order.id}</span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{order.fecha}</span>
+        {/* MOBILE VIEW - Redesigned for Premium Layout */}
+        <div className="md:hidden divide-y divide-slate-100 bg-white">
+          {orders.map((order, idx) => {
+            const statusColor = order.status === 'FACTURADA' ? 'bg-green-50 text-green-700 border-green-100' : 
+                               order.status === 'EN TRANSITO' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                               order.status === 'ENTREGADA' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                               order.status === 'SOLICITADA' ? 'bg-[#003d7a]/5 text-[#003d7a] border-[#003d7a]/10' :
+                               'bg-slate-50 text-slate-600 border-slate-100';
+
+            return (
+              <div key={idx} className="p-4 active:bg-slate-50 transition-colors border-l-4 border-transparent active:border-[#003d7a]" onClick={() => setSelectedOrderId(order.id)}>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-[#003d7a]">#{order.id}</span>
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${statusColor} uppercase tracking-tight`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-black text-[#003d7a] bg-[#ffce00]/20 px-2 py-1 rounded-lg">
+                    {order.total}
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold text-brand-blue bg-blue-50 px-2 py-1 rounded-md">{order.total}</span>
+                
+                <div className="text-sm font-bold text-slate-800 mb-2 leading-tight">{order.cliente}</div>
+                
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 gap-2">
+                   <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3 h-3 text-slate-400" />
+                      <span className="text-[9px] font-bold text-slate-500">{order.fecha}</span>
+                   </div>
+                   <div className="flex items-center gap-2">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const fNum = order.factura ? order.factura.replace('F-', '').trim() : order.id;
+                          const serie = order.serie || 'MLLNI';
+                          window.open(`http://multillantasnieto.net:8081/Invoice33ext/mllni/fac/pdf/Factura${serie}${fNum}.pdf`, '_blank');
+                        }} 
+                        className="px-3 py-1 bg-red-50 text-red-600 border border-red-100 font-black text-[9px] rounded-lg flex items-center gap-1 shadow-sm active:scale-90"
+                      >
+                        PDF
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const fNum = order.factura ? order.factura.replace('F-', '').trim() : order.id;
+                          const serie = order.serie || 'MLLNI';
+                          window.open(`http://multillantasnieto.net:8081/Invoice33ext/mllni/fac/xml/Factura${serie}${fNum}xml.tgz`, '_blank');
+                        }} 
+                        className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 font-black text-[9px] rounded-lg flex items-center gap-1 shadow-sm active:scale-90"
+                      >
+                        XML
+                      </button>
+                   </div>
+                </div>
               </div>
-              <div className="text-sm font-bold text-slate-700">{order.cliente}</div>
-            </div>
-          ))}
+            )})}
         </div>
         
         <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-between items-center print:hidden">
