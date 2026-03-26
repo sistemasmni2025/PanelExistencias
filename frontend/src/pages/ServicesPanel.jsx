@@ -21,7 +21,8 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
     serie: '',
     rin: '',
     nombre: '',
-    marca: 'INICIO', // Default to genexus fallback
+    marca: ['INICIO'], // Changed to array for multi-selection
+    clase: '',
     soloConExistencias: false,
     isGamma: true
   });
@@ -62,7 +63,16 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
       if (filters.serie) queryParams.append('serie', filters.serie);
       if (filters.rin) queryParams.append('rin', filters.rin);
       if (filters.nombre) queryParams.append('nombre', filters.nombre);
-      if (filters.marca && filters.marca !== 'TODOS') queryParams.append('marca', filters.marca);
+      
+      // Handle multiple brands as comma separated string
+      if (filters.marca && filters.marca.length > 0) {
+        const brandsToQuery = filters.marca.filter(m => m !== 'TODOS');
+        if (brandsToQuery.length > 0) {
+          queryParams.append('marca', brandsToQuery.join(','));
+        }
+      }
+      
+      if (filters.clase && filters.clase !== 'TODOS') queryParams.append('clase', filters.clase);
       if (filters.soloConExistencias) queryParams.append('conExistencias', 'true');
       if (filters.isGamma) queryParams.append('isGamma', 'true');
 
@@ -239,7 +249,7 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
                 cartTotal={cartTotal}
                 filters={filters}
                 lastSync={lastSync}
-                onClearFilters={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO', soloConExistencias: false, isGamma: true })}
+                onClearFilters={() => setFilters({ ancho: '', serie: '', rin: '', nombre: '', marca: ['INICIO'], clase: '', soloConExistencias: false, isGamma: true })}
               />
             </div>
 

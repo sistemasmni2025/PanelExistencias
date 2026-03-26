@@ -12,13 +12,10 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: 3306
 });
-
-
 
 
 /**
@@ -166,32 +163,11 @@ app.get('/api/existencias/search', async (req, res) => {
       query += " AND a.almstat = 'G'";
     }
 
-    // --- MEJORA: FILTRADO POR CLASE (ADITIVO CON MAPEO) ---
+    // --- MEJORA: FILTRADO POR CLASE (ADITIVO) ---
     if (clase && clase !== 'TODOS') {
-      let claseCode = clase;
-      
-      // Mapeo de nombres legibles a códigos de base de datos (gruclas)
-      if (clase === 'Auto / Camioneta') {
-        claseCode = 'A';
-      } else if (clase === 'Camión') {
-        claseCode = 'C';
-      } else if (clase === 'MueveTierra') {
-        claseCode = 'O';
-      } else if (clase === 'Industrial') {
-        claseCode = 'I';
-      } else if (clase === 'Agrícola') {
-        claseCode = 'G';
-      } else if (clase === 'Motocicleta') {
-        claseCode = 'M';
-      } else if (clase === 'Camaras / Corbatas') {
-        claseCode = '1';
-      }
-
-
       query += " AND g.gruclas = ?";
-      params.push(claseCode);
+      params.push(clase);
     }
-
 
     // --- FILTRADO POR MARCA (SOPORTA SELECCION MULTIPLE) ---
     if (marca && marca !== 'TODOS' && !nombre) {
@@ -310,7 +286,6 @@ app.get('/api/pedidos', async (req, res) => {
     }
 
     query += ' GROUP BY v.VentaId ORDER BY v.VentaId DESC LIMIT 100';
-
 
     const [rows] = await pool.query(query, params);
 
@@ -549,8 +524,5 @@ app.post('/api/cotizaciones/:id/items', async (req, res) => {
  * =========================================================================
  */
 app.listen(4000, '0.0.0.0', () => {
-
-
-
-    console.log('API Multillantas Nieto corriendo en puerto 4000 (v500 lines)');
+    console.log('API Multillantas Nieto corriendo en puerto 4000 (v502 lines)');
 });

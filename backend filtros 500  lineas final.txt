@@ -19,8 +19,6 @@ const pool = mysql.createPool({
 });
 
 
-
-
 /**
  * =========================================================================
  * LOGIN CON COMPATIBILIDAD HEREDADA (GENEXUS)
@@ -435,7 +433,7 @@ app.get('/api/pedidos/:id', async (req, res) => {
       header: {
         id: h.VentaId, fecha: h.fecha_fmt, status: h.VentaStatus, login: h.UsuarioLogin, no_cliente: h.no_cliente, 
         orden_venta: h.VentaOrden, subtotal: '$' + formatCurrency(st), iva: '$' + formatCurrency(it), total: '$' + formatCurrency(st + it),
-        tipo: h.VentaTipo, tipo_bool: h.VentaStatusTipo ? 'true' : 'false', observaciones: h.VentaObservaciones, id_c: h.VentaIdC,
+        tipo: h.VentaTipo, tipo_bool: h.VentaStatusTipo ? 'true' : 'false', observaciones: h.VentaObservations, id_c: h.VentaIdC,
         serie: h.VentaSerie || 'MLLNI', factura: h.VentaFactura || '', status_desc: h.VentaStatusInterno || 'N/A',
         solicitud: h.solicitud_fmt || '-', factura_hora: h.factura_fmt || '-', almacen: h.almacen_fmt || '-',
         entrega: h.entrega_fmt || '-', recepcion: h.recepcion_fmt || '-', transito: h.transito_fmt || '-',

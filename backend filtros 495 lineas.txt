@@ -3,30 +3,20 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 require('dotenv').config();
 
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
-
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: 3306
 });
 
 
-
-
-/**
- * =========================================================================
- * LOGIN CON COMPATIBILIDAD HEREDADA (GENEXUS)
- * =========================================================================
- * Valida usuarios migrados del sistema anterior utilizando Twofish/Plano.
- */
+// --- LOGIN CON COMPATIBILIDAD HEREDADA (GENEXUS) ---
 app.post('/api/login', async (req, res) => {
   const { user, password } = req.body;
   
@@ -42,8 +32,8 @@ app.post('/api/login', async (req, res) => {
 
     if (rows.length > 0) {
       const dbUser = rows[0];
-      const dbPassPlain = (dbUser.UsuarioPass || '').trim(); 
-      
+      const dbPassPlain = (dbUser.UsuarioPass || '').trim(); // Clave en texto plano de la DB
+
       // Lógica de compatibilidad definitiva:
       const isMatch = 
         cleanPass === dbPassPlain || 
@@ -55,22 +45,12 @@ app.post('/api/login', async (req, res) => {
          // Limpiamos datos sensibles antes de enviar al front
          delete dbUser.UsuarioPassword;
          delete dbUser.UsuarioPass;
-
-         res.json({ 
-           success: true, 
-           user: dbUser 
-         });
+         res.json({ success: true, user: dbUser });
       } else {
-        res.status(401).json({ 
-          success: false, 
-          message: 'Contraseña incorrecta.' 
-        });
+        res.status(401).json({ success: false, message: 'Contraseña incorrecta.' });
       }
     } else {
-      res.status(401).json({ 
-        success: false, 
-        message: 'El usuario no existe.' 
-      });
+      res.status(401).json({ success: false, message: 'El usuario no existe.' });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -78,12 +58,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-/**
- * =========================================================================
- * BÚSQUEDA DE EXISTENCIAS (DINÁMICA DE SUCURSALES Y CAMPAÑAS)
- * =========================================================================
- * Maneja el inventario en tiempo real con filtrado aditivo múltiple.
- */
+// --- BÚSQUEDA DE EXISTENCIAS (INCLUYE CAMPAÑAS Y DINÁMICA DE SUCURSALES) ---
 app.get('/api/existencias/search', async (req, res) => {
   const { ancho, serie, rin, nombre, marca, conExistencias, isGamma, clase } = req.query; 
   
@@ -144,18 +119,9 @@ app.get('/api/existencias/search', async (req, res) => {
     `;
 
     const params = [];
-    if (ancho) { 
-        query += " AND a.almancho = ?"; 
-        params.push(ancho); 
-    }
-    if (serie) { 
-        query += " AND a.almserie = ?"; 
-        params.push(serie); 
-    }
-    if (rin) { 
-        query += " AND a.almrin = ?"; 
-        params.push(rin); 
-    }
+    if (ancho) { query += " AND a.almancho = ?"; params.push(ancho); }
+    if (serie) { query += " AND a.almserie = ?"; params.push(serie); }
+    if (rin) { query += " AND a.almrin = ?"; params.push(rin); }
     
     if (nombre) {
       query += " AND (a.ALMNOM LIKE ? OR a.almcve LIKE ?)";
@@ -166,72 +132,43 @@ app.get('/api/existencias/search', async (req, res) => {
       query += " AND a.almstat = 'G'";
     }
 
-    // --- MEJORA: FILTRADO POR CLASE (ADITIVO CON MAPEO) ---
+    // --- MEJORA: FILTRADO POR CLASE (ADITIVO) ---
     if (clase && clase !== 'TODOS') {
-      let claseCode = clase;
-      
-      // Mapeo de nombres legibles a códigos de base de datos (gruclas)
-      if (clase === 'Auto / Camioneta') {
-        claseCode = 'A';
-      } else if (clase === 'Camión') {
-        claseCode = 'C';
-      } else if (clase === 'MueveTierra') {
-        claseCode = 'O';
-      } else if (clase === 'Industrial') {
-        claseCode = 'I';
-      } else if (clase === 'Agrícola') {
-        claseCode = 'G';
-      } else if (clase === 'Motocicleta') {
-        claseCode = 'M';
-      } else if (clase === 'Camaras / Corbatas') {
-        claseCode = '1';
-      }
-
-
       query += " AND g.gruclas = ?";
-      params.push(claseCode);
+      params.push(clase);
     }
 
-
-    // --- FILTRADO POR MARCA (SOPORTA SELECCION MULTIPLE) ---
     if (marca && marca !== 'TODOS' && !nombre) {
-      const marcasArray = marca.split(',');
-      let marcaConditions = [];
+      const m = marca.toUpperCase();
+      if (m === 'INICIO') {
+        query += " AND g.grumar IN ('MI','BF','UN','AS')";
+      } else if (m === 'OTRAS MARCAS') {
+        query += " AND (g.grumar NOT IN ('MI','BF','UN','AS','LS','RO','SL','CT','FW','TY','LV','FS','BS','ID','TS') OR g.grumar = 'OM')";
+      } else {
+        let gmar = '';
+        if (m === 'MICHELIN') gmar = 'MI';
+        else if (m === 'BFGOODRICH') gmar = 'BF';
+        else if (m === 'UNIROYAL') gmar = 'UN';
+        else if (m === 'ASOCIADAS') gmar = 'AS';
+        else if (m === 'ROVELO') gmar = 'RO';
+        else if (m === 'CONTINENTAL') gmar = 'CT';
+        else if (m === 'FRONWAY') gmar = 'FW';
+        else if (m === 'TOYO') gmar = 'TY';
+        
+        // MARCAS ADICIONALES SOLICITADAS:
+        else if (m === 'LANVIGATOR') gmar = 'LV';
+        else if (m === 'FIRESTONE') gmar = 'FS';
+        else if (m === 'BRIDGESTONE') gmar = 'BS';
+        else if (m === 'INDONESIA') gmar = 'ID';
+        else if (m === 'TAURUS') gmar = 'TS';
 
-      marcasArray.forEach(mItem => {
-        const m = mItem.trim().toUpperCase();
-        if (m === 'INICIO') {
-          marcaConditions.push("g.grumar IN ('MI','BF','UN','AS')");
-        } else if (m === 'OTRAS MARCAS') {
-          marcaConditions.push("(g.grumar NOT IN ('MI','BF','UN','AS','LS','RO','SL','CT','FW','TY','LV','FS','BS','ID','TS') OR g.grumar = 'OM')");
+        if (gmar) {
+          query += " AND g.grumar = ?";
+          params.push(gmar);
         } else {
-          let gmar = '';
-          if (m === 'MICHELIN') gmar = 'MI';
-          else if (m === 'BFGOODRICH') gmar = 'BF';
-          else if (m === 'UNIROYAL') gmar = 'UN';
-          else if (m === 'ASOCIADAS') gmar = 'AS';
-          else if (m === 'ROVELO') gmar = 'RO';
-          else if (m === 'CONTINENTAL') gmar = 'CT';
-          else if (m === 'FRONWAY') gmar = 'FW';
-          else if (m === 'TOYO') gmar = 'TY';
-          else if (m === 'LANVIGATOR') gmar = 'LV';
-          else if (m === 'FIRESTONE') gmar = 'FS';
-          else if (m === 'BRIDGESTONE') gmar = 'BS';
-          else if (m === 'INDONESIA') gmar = 'ID';
-          else if (m === 'TAURUS') gmar = 'TS';
-
-          if (gmar) {
-            marcaConditions.push("g.grumar = ?");
-            params.push(gmar);
-          } else {
-            marcaConditions.push("a.ALMNOM LIKE ?");
-            params.push('%' + mItem.trim() + '%');
-          }
+          query += " AND a.ALMNOM LIKE ?";
+          params.push('%' + marca + '%');
         }
-      });
-
-      if (marcaConditions.length > 0) {
-        query += " AND (" + marcaConditions.join(" OR ") + ")";
       }
     }
     
@@ -241,25 +178,17 @@ app.get('/api/existencias/search', async (req, res) => {
       query += " HAVING SUM(IFNULL(s.almstock, 0)) > 0";
     }
 
-    // --- MEJORA: ORDENAMIENTO PRIORITARIO (GAMMA Y LUEGO MAYOR STOCK) ---
-    query += " ORDER BY (a.almstat = 'G') DESC, SUM(IFNULL(s.almstock, 0)) DESC, g.grudesc, a.almcve LIMIT 2500";
+    query += " ORDER BY g.grudesc, a.almcve LIMIT 2500";
 
     const [rows] = await pool.query(query, params);
-    
     res.json(rows);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 
-/**
- * =========================================================================
- * LISTADO DE PEDIDOS / VENTAS
- * =========================================================================
- * Retorna el histórico o cola de pedidos filtrado por usuario/fecha.
- */
+// --- PEDIDOS / VENTAS ---
 app.get('/api/pedidos', async (req, res) => {
   const { usuario, desde, hasta, status } = req.query;
   
@@ -311,7 +240,6 @@ app.get('/api/pedidos', async (req, res) => {
 
     query += ' GROUP BY v.VentaId ORDER BY v.VentaId DESC LIMIT 100';
 
-
     const [rows] = await pool.query(query, params);
 
     const formattedRows = rows.map(r => {
@@ -354,19 +282,13 @@ app.get('/api/pedidos', async (req, res) => {
     });
 
     res.json(formattedRows);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 
-/**
- * =========================================================================
- * DETALLE DE PEDIDO (MODAL DETALLADO)
- * =========================================================================
- * Retorna las 3 pestañas: General, Detalle y Surtimiento.
- */
+// --- DETALLE DE PEDIDO ESPECÍFICO (TABS: GENERAL, DETALLE, SURTIMIENTO) ---
 app.get('/api/pedidos/:id', async (req, res) => {
   const { id } = req.params;
   
@@ -384,50 +306,25 @@ app.get('/api/pedidos/:id', async (req, res) => {
       WHERE v.VentaId = ?
     `, [id]);
 
-    if (headerRows.length === 0) {
-        return res.status(404).json({ error: 'Pedido no encontrado' });
-    }
+    if (headerRows.length === 0) return res.status(404).json({ error: 'No encontrado' });
     
     const h = headerRows[0];
-    
-    const [detailRows] = await pool.query(`
-        SELECT vd.*, a.ALMNOM as descrip, a.almplist as plist 
-        FROM ventadetalle vd 
-        LEFT JOIN almcat a ON vd.almcve = a.almcve 
-        WHERE vd.VentaId = ?
-    `, [id]);
-
-    const [surtRows] = await pool.query(`
-        SELECT vs.*, a.ALMNOM as nom, g.grumar as mar, g.grucve as gru 
-        FROM ventasurtimiento vs 
-        LEFT JOIN almcat a ON vs.SurtimientoClave = a.almcve 
-        LEFT JOIN almgru g ON a.grucve = g.grucve 
-        WHERE vs.VentaId = ?
-    `, [id]);
+    const [detailRows] = await pool.query(`SELECT vd.*, a.ALMNOM as descrip, a.almplist as plist FROM ventadetalle vd LEFT JOIN almcat a ON vd.almcve = a.almcve WHERE vd.VentaId = ?`, [id]);
+    const [surtRows] = await pool.query(`SELECT vs.*, a.ALMNOM as nom, g.grumar as mar, g.grucve as gru FROM ventasurtimiento vs LEFT JOIN almcat a ON vs.SurtimientoClave = a.almcve LEFT JOIN almgru g ON a.grucve = g.grucve WHERE vs.VentaId = ?`, [id]);
 
     const formatCurrency = (val) => (parseFloat(val) || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
     let st = 0, it = 0;
     
     const items = detailRows.map(d => {
       const imp = (d.VentaDetalleCan || 0) * (parseFloat(d.VentaDetallePV) || 0);
       const ivi = d.VentaDetalleIva === 'S' ? imp * 0.16 : 0;
-      st += imp; 
-      it += ivi;
-
+      st += imp; it += ivi;
       return {
-        clave: d.almcve, 
-        descripcion: d.descrip, 
-        iva: d.VentaDetalleIva, 
-        cantidad: d.VentaDetalleCan,
-        venta: '$' + formatCurrency(d.VentaDetallePV), 
-        iva_importe: '$' + formatCurrency(ivi),
-        subtotal: '$' + formatCurrency(imp), 
-        costo: '$' + formatCurrency(d.VentaDetalleMFPCos),
-        p_lista: '$' + formatCurrency(d.plist), 
-        original: d.VentaDetalleOriginal || 0,
-        mfdescncp: '$' + formatCurrency(d.VentaDetallemfdescncp), 
-        pvn: '$' + formatCurrency(d.VentaDetallePV)
+        clave: d.almcve, descripcion: d.descrip, iva: d.VentaDetalleIva, cantidad: d.VentaDetalleCan,
+        venta: '$' + formatCurrency(d.VentaDetallePV), iva_importe: '$' + formatCurrency(ivi),
+        subtotal: '$' + formatCurrency(imp), costo: '$' + formatCurrency(d.VentaDetalleMFPCos),
+        p_lista: '$' + formatCurrency(d.plist), original: d.VentaDetalleOriginal || 0,
+        mfdescncp: '$' + formatCurrency(d.VentaDetallemfdescncp), pvn: '$' + formatCurrency(d.VentaDetallePV)
       };
     });
 
@@ -451,35 +348,21 @@ app.get('/api/pedidos/:id', async (req, res) => {
         marca: s.mar, grupo: s.gru
       }))
     });
-
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 
-/**
- * =========================================================================
- * FUNCIONES DE COTIZACIONES
- * =========================================================================
- * Gestión de borradores de cotización para clientes.
- */
+// --- NUEVAS FUNCIONES DE COTIZACIONES (AGREGADAS) ---
 app.get('/api/cotizaciones', async (req, res) => {
   const { usuario } = req.query;
   try {
     let query = 'SELECT * FROM Cotizacion';
     const params = [];
-    if (usuario) { 
-        query += ' WHERE UsuarioLogin = ?'; 
-        params.push(usuario); 
-    }
+    if (usuario) { query += ' WHERE UsuarioLogin = ?'; params.push(usuario); }
     query += ' ORDER BY CotizacionId DESC LIMIT 50';
     const [rows] = await pool.query(query, params);
-    
     res.json(rows);
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.get('/api/cotizaciones/:id', async (req, res) => {
@@ -487,15 +370,9 @@ app.get('/api/cotizaciones/:id', async (req, res) => {
     const { id } = req.params;
     const [header] = await pool.query('SELECT * FROM Cotizacion WHERE CotizacionId = ?', [id]);
     const [details] = await pool.query('SELECT * FROM CotizacionDetalle WHERE CotizacionId = ?', [id]);
-
-    if (header.length > 0) {
-        res.json({ ...header[0], items: details });
-    } else {
-        res.status(404).json({ error: 'Cotización no encontrada' });
-    }
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+    if (header.length > 0) res.json({ ...header[0], items: details });
+    else res.status(404).json({ error: 'Cotización no encontrada' });
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post('/api/cotizaciones', async (req, res) => {
@@ -507,9 +384,7 @@ app.post('/api/cotizaciones', async (req, res) => {
       [d, UsuarioLogin, nclicve || 0, nclinom || '', ncategcve || 1, nclidcred || 0, nclimail || '']
     );
     res.json({ success: true, CotizacionId: result.insertId });
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.put('/api/cotizaciones/:id', async (req, res) => {
@@ -518,39 +393,22 @@ app.put('/api/cotizaciones/:id', async (req, res) => {
   try {
     await pool.query('UPDATE Cotizacion SET nclicve = ?, nclinom = ?, nclimail = ? WHERE CotizacionId = ?', [nclicve || 0, nclinom, nclimail, id]);
     res.json({ success: true });
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post('/api/cotizaciones/:id/items', async (req, res) => {
   const { id } = req.params;
   const { clave, concepto, cantidad, precio, justificacion, tipo, iva } = req.body;
-  
   try {
     const [exists] = await pool.query('SELECT CotizacionDetalleCantidad FROM CotizacionDetalle WHERE CotizacionId = ? AND CotizacionDetalleClave = ?', [id, clave]);
-    
     if (exists.length > 0) {
       await pool.query('UPDATE CotizacionDetalle SET CotizacionDetalleCantidad = ? WHERE CotizacionId = ? AND CotizacionDetalleClave = ?', [exists[0].CotizacionDetalleCantidad + (cantidad || 1), id, clave]);
     } else {
       await pool.query('INSERT INTO CotizacionDetalle (CotizacionId, CotizacionDetalleClave, CotizacionDetalleConcepto, CotizacionDetalleCantidad, CotizacionDetallePrecio, CotizacionDetalleJustificacion, CotizacionDetalleTipo, CotizacionDetalleIva) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [id, clave, concepto, cantidad || 1, precio || 0, justificacion || '', tipo || 'A', iva || 'S']);
     }
-    
     res.json({ success: true });
-  } catch (error) { 
-    res.status(500).json({ error: error.message }); 
-  }
+  } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 
-/**
- * =========================================================================
- * INICIO DEL SERVIDOR
- * =========================================================================
- */
-app.listen(4000, '0.0.0.0', () => {
-
-
-
-    console.log('API Multillantas Nieto corriendo en puerto 4000 (v500 lines)');
-});
+app.listen(4000, '0.0.0.0', () => console.log('API Multillantas Nieto corriendo en puerto 4000 (v495 lines)'));

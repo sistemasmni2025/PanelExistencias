@@ -16,7 +16,9 @@ const ServicesHeader = ({
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 xl:gap-6">
         
         {/* Search Input */}
-        <div className="w-full flex-1 relative flex shadow-sm rounded-lg overflow-hidden border border-slate-300 focus-within:border-brand-blue focus-within:ring-1 focus-within:ring-brand-blue transition-all bg-white min-w-[200px]">
+        <div className={`w-full flex-1 relative flex shadow-sm rounded-lg overflow-hidden border transition-all min-w-[200px] ${
+          searchTerm ? 'bg-yellow-50 border-yellow-400 focus-within:ring-yellow-400' : 'bg-white border-slate-300 focus-within:border-brand-blue focus-within:ring-brand-blue'
+        }`}>
           <input 
             type="text" 
             placeholder="Buscar llantas, descripciones o códigos..." 
@@ -24,8 +26,10 @@ const ServicesHeader = ({
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
           />
-          <button className="bg-slate-50 hover:bg-slate-100 px-5 flex items-center justify-center border-l border-slate-300 transition-colors">
-             <Search className="h-4 w-4 text-slate-500" />
+          <button className={`px-5 flex items-center justify-center border-l transition-colors ${
+            searchTerm ? 'bg-yellow-100 border-yellow-400 hover:bg-yellow-200' : 'bg-slate-50 border-slate-300 hover:bg-slate-100'
+          }`}>
+             <Search className={`h-4 w-4 ${searchTerm ? 'text-[#003d7a]' : 'text-slate-500'}`} />
           </button>
         </div>
 
@@ -33,20 +37,36 @@ const ServicesHeader = ({
         <div className="flex shrink-0 flex-col sm:flex-row items-start sm:items-center justify-end gap-4">
            
            {/* Active Filters */}
-           <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 flex-1 sm:flex-none">
-              <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse shrink-0"></span>
-              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5 flex-wrap">
-                FILTRO: <span className="text-brand-red">{filters.marca || 'TODOS'}</span>
-                {filters.ancho && <span className="text-brand-blue bg-blue-100 px-1 rounded">/ A: {filters.ancho}</span>}
-              </span>
-              {onClearFilters && (
-                <XCircle 
-                  className="w-4 h-4 text-slate-400 hover:text-brand-red cursor-pointer transition-colors ml-1" 
-                  onClick={onClearFilters}
-                  title="Limpiar Filtros"
-                />
-              )}
-           </div>
+           {(() => {
+             const brands = Array.isArray(filters.marca) ? filters.marca : [filters.marca];
+             const isInicio = brands.length === 1 && brands[0] === 'INICIO';
+             const hasActiveFilters = !isInicio || filters.clase || filters.ancho || filters.serie || filters.rin;
+             const marcasDisplay = isInicio ? 'INICIO' : (brands.length > 2 ? `${brands.length} MARCAS` : brands.join(', '));
+
+             return (
+               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border flex-1 sm:flex-none transition-colors ${
+                 hasActiveFilters ? 'bg-yellow-400 border-yellow-500 shadow-md' : 'bg-slate-50 border-slate-100'
+               }`}>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    hasActiveFilters ? 'bg-[#003d7a]' : 'bg-brand-red animate-pulse'
+                  }`}></span>
+                  <span className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 flex-wrap ${
+                    hasActiveFilters ? 'text-slate-900' : 'text-slate-600'
+                  }`}>
+                    FILTRO: <span className={hasActiveFilters ? 'text-[#003d7a]' : 'text-brand-red'}>{marcasDisplay}</span>
+                    {filters.clase && <span className="text-[#003d7a] opacity-70">/ {filters.clase}</span>}
+                    {filters.ancho && <span className="bg-white/40 px-1 rounded">/ A: {filters.ancho}</span>}
+                  </span>
+                  {onClearFilters && (
+                    <XCircle 
+                      className="w-4 h-4 text-slate-400 hover:text-brand-red cursor-pointer transition-colors ml-1" 
+                      onClick={onClearFilters}
+                      title="Limpiar Filtros"
+                    />
+                  )}
+               </div>
+             );
+           })()}
 
            {/* Sync Indicator */}
            {lastSync && (

@@ -2,25 +2,28 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronRight, Filter, X, Settings, Search, Check } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
-  // Mock data for the sidebar accordion from Image 2
+  // categories according to user screenshots and missing brands
   const categories = [
     {
       id: 1,
+      name: 'marca',
       title: 'MARCAS (AUTO/CAM)',
       isOpen: true,
       items: [
-        'MICHELIN', 'BFGOODRICH', 'UNIROYAL', 'ASOCIADAS', 'OTRAS MARCAS',
-        'ROVELO', 'CONTINENTAL', 'FRONWAY', 'TOYO', 'LANVIGATOR', 'INDONESIA'
+        'MICHELIN', 'BFGOODRICH', 'UNIROYAL', 'BFGOODRICH / UNIROYAL (MTO)', 'OTRAS MARCAS',
+        'ROVELO', 'CONTINENTAL', 'FRONWAY', 'TOYO', 'LANVIGATOR', 'BRIDGESTONE', 'FIRESTONE', 'INDONESIA'
       ]
     },
     {
       id: 2,
+      name: 'marca',
       title: 'MARCAS (CAMIÓN)',
       isOpen: false,
-      items: ['TAURUS', 'CONTINENTAL', 'MICHELIN']
+      items: ['TAURUS', 'CONTINENTAL', 'MICHELIN', 'BFGOODRICH', 'UNIROYAL', 'OTRAS MARCAS']
     },
     {
       id: 3,
+      name: 'clase',
       title: 'CLASE DE LLANTA',
       isOpen: false,
       items: ['Auto / Camioneta', 'Camión', 'MueveTierra', 'Industrial', 'Agrícola', 'Camaras / Corbatas', 'Motocicleta']
@@ -97,7 +100,7 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
               <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-widest">Filtros Activos</h3>
               <button
                 onClick={() => {
-                  onFilterChange({ ancho: '', serie: '', rin: '', nombre: '', marca: 'INICIO' });
+                  onFilterChange({ ancho: '', serie: '', rin: '', nombre: '', marca: ['INICIO'], clase: '' });
                   setIsOpen(false);
                 }}
                 className="text-[10px] font-black text-brand-blue uppercase tracking-wider hover:underline"
@@ -110,28 +113,30 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
               onClick={(e) => {
                 e.preventDefault();
                 onFilterChange({ soloConExistencias: !filters.soloConExistencias });
-                setIsOpen(false);
               }}
-              className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-slate-50 border border-transparent transition-colors mb-2"
+              className={`flex items-center gap-3 cursor-pointer group p-2 rounded-lg transition-colors mb-2 border ${
+                filters.soloConExistencias ? 'bg-yellow-101 border-yellow-400 font-bold' : 'hover:bg-slate-50 border-transparent'
+              }`}
             >
               <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.soloConExistencias ? 'bg-[#003d7a] border-[#003d7a]' : 'bg-white border-slate-300'}`}>
                 {filters.soloConExistencias && <Check className="w-3.5 h-3.5 text-white" />}
               </div>
-              <span className="text-[13px] font-bold text-slate-700 group-hover:text-[#003d7a] transition-colors">Solo con stock disponible</span>
+              <span className={`text-[13px] text-slate-700 transition-colors ${filters.soloConExistencias ? 'text-[#003d7a]' : 'group-hover:text-[#003d7a]'}`}>Solo con stock disponible</span>
             </label>
 
             <label 
                onClick={(e) => {
                  e.preventDefault();
                  onFilterChange({ isGamma: !filters.isGamma });
-                 setIsOpen(false);
                }}
-               className="flex items-center gap-3 cursor-pointer group p-2 rounded-lg hover:bg-slate-50 border border-transparent transition-colors"
+               className={`flex items-center gap-3 cursor-pointer group p-2 rounded-lg transition-colors border ${
+                 filters.isGamma ? 'bg-yellow-101 border-yellow-400 font-bold' : 'hover:bg-slate-50 border-transparent'
+               }`}
             >
               <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${filters.isGamma ? 'bg-green-600 border-green-600' : 'bg-white border-slate-300'}`}>
                 {filters.isGamma && <Check className="w-3.5 h-3.5 text-white" />}
               </div>
-              <span className="text-[13px] font-bold text-slate-700 group-hover:text-green-700 transition-colors">Solo productos Gamma</span>
+              <span className={`text-[13px] text-slate-700 transition-colors ${filters.isGamma ? 'text-green-700' : 'group-hover:text-green-700'}`}>Solo productos Gamma</span>
             </label>
           </div>
 
@@ -146,7 +151,9 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
                 <input
                   type="text"
                   placeholder="Ej. 275"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:bg-white focus:border-brand-blue focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal"
+                  className={`w-full border rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal ${
+                    filters.ancho ? 'bg-yellow-100 border-yellow-400' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-blue'
+                  }`}
                   value={filters.ancho}
                   onChange={(e) => onFilterChange({ ancho: e.target.value })}
                 />
@@ -157,7 +164,9 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
                   <input
                     type="text"
                     placeholder="Ej. 80"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:bg-white focus:border-brand-blue focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal"
+                    className={`w-full border rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal ${
+                      filters.serie ? 'bg-yellow-100 border-yellow-400' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-blue'
+                    }`}
                     value={filters.serie}
                     onChange={(e) => onFilterChange({ serie: e.target.value })}
                   />
@@ -167,7 +176,9 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
                   <input
                     type="text"
                     placeholder="Ej. 22.5"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:bg-white focus:border-brand-blue focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal"
+                    className={`w-full border rounded-xl py-2.5 px-3 text-[13px] font-bold text-slate-800 focus:ring-1 focus:ring-brand-blue outline-none transition-all placeholder:text-slate-300 placeholder:font-normal ${
+                      filters.rin ? 'bg-yellow-100 border-yellow-400' : 'bg-slate-50 border-slate-200 focus:bg-white focus:border-brand-blue'
+                    }`}
                     value={filters.rin}
                     onChange={(e) => onFilterChange({ rin: e.target.value })}
                   />
@@ -193,26 +204,44 @@ const Sidebar = ({ isOpen, setIsOpen, filters, onFilterChange }) => {
                 </button>
 
                 {/* Expanded items as Radio-style buttons */}
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out px-2 ${expandedCats[cat.id] ? 'max-h-[500px] mt-1' : 'max-h-0'}`}>
-                  <div className="space-y-1">
+                <div className={`overflow-hidden transition-all duration-[400ms] ease-in-out px-2 ${expandedCats[cat.id] ? 'max-h-[1200px] mt-1' : 'max-h-0'}`}>
+                  <div className="space-y-1 pb-4">
                     {cat.items.map((item, idx) => {
-                      const isActive = filters.marca === item;
+                      const activeMarca = Array.isArray(filters.marca) ? filters.marca : [filters.marca];
+                      const isActive = cat.name === 'marca' 
+                        ? activeMarca.includes(item)
+                        : filters[cat.name] === item;
+
                       return (
                         <button
                           key={idx}
                           onClick={() => {
-                            onFilterChange({ marca: isActive ? 'INICIO' : item });
-                            setIsOpen(false);
+                            if (cat.name === 'marca') {
+                                let newBrands;
+                                if (activeMarca.includes(item)) {
+                                    newBrands = activeMarca.filter(b => b !== item);
+                                    if (newBrands.length === 0) newBrands = ['INICIO'];
+                                } else {
+                                    newBrands = activeMarca.filter(b => b !== 'INICIO');
+                                    newBrands.push(item);
+                                }
+                                onFilterChange({ marca: newBrands });
+                            } else {
+                                onFilterChange({ [cat.name]: isActive ? '' : item });
+                            }
                           }}
-                          className={`w-full flex items-center gap-3 text-left px-3 py-2 rounded-lg text-[13px] transition-all ${isActive
-                              ? 'bg-blue-50 text-[#003d7a] font-black'
-                              : 'text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900'
-                            }`}
+                          className={`w-full flex items-center gap-3 text-left px-4 py-2.5 rounded-xl text-[13px] transition-all border mb-1 ${
+                            isActive
+                              ? 'bg-[#FFC107] text-slate-950 font-black border-yellow-600 shadow-sm'
+                              : 'bg-white text-slate-600 font-bold border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
                         >
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isActive ? 'border-[#003d7a]' : 'border-slate-300'}`}>
-                            {isActive && <div className="w-2 h-2 rounded-full bg-[#003d7a]"></div>}
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                            isActive ? 'bg-white border-yellow-600' : 'bg-white border-slate-300'
+                          }`}>
+                            {isActive && <div className="w-2.5 h-2.5 rounded-full bg-[#FFC107]"></div>}
                           </div>
-                          {item}
+                          <span className="uppercase tracking-tight">{item}</span>
                         </button>
                       );
                     })}
