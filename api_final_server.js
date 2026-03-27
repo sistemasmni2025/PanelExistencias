@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
 
@@ -16,6 +17,19 @@ const pool = mysql.createPool({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   port: 3306
+});
+
+// Configuración de Google Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-flash",
+  systemInstruction: `Eres un asistente experto de Multillantas Nieto. Tu trabajo es ayudar a los vendedores a encontrar llantas en el inventario.
+  Analiza el mensaje del usuario y extrae los filtros técnicos: ancho, serie, rin, marca, clase.
+  - marcas posibles: MICHELIN, BFGOODRICH, UNIROYAL, CONTINENTAL, ROVELO, TOYO, etc.
+  - clases: Auto / Camioneta, Camión, MueveTierra, Industrial, Agrícola, Motocicleta.
+  
+  Responde de forma natural y AMABLE. Al final de tu respuesta, SIEMPRE incluye un bloque de código JSON con los filtros detectados.
+  Ejemplo de JSON: {"filters": {"ancho": "275", "serie": "80", "rin": "22.5", "marca": ["MICHELIN"], "clase": "Camión", "isGamma": true}}`
 });
 
 
@@ -36,13 +50,13 @@ app.post('/api/login', async (req, res) => {
     
     // Buscamos al usuario por login (Case-Insensitive)
     const [rows] = await pool.query(
-      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.UsuarioPass, u.SucursalId, s.SucursalAbreviacion as SucursalNombre, u.PerfilId FROM usuario u LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId WHERE UPPER(TRIM(u.usuariologin)) = ?",
+      "SELECT u.usuariologin, u.UsuarioNombre, u.UsuarioPassword, u.SucursalId, s.SucursalAbreviacion as SucursalNombre, u.PerfilId FROM usuario u LEFT JOIN sucursal s ON u.SucursalId = s.SucursalId WHERE UPPER(TRIM(u.usuariologin)) = ?",
       [cleanUser]
     );
 
     if (rows.length > 0) {
       const dbUser = rows[0];
-      const dbPassPlain = (dbUser.UsuarioPass || '').trim(); 
+      const dbPassPlain = (dbUser.UsuarioPassword || '').trim(); 
       
       // Lógica de compatibilidad definitiva:
       const isMatch = 
@@ -73,6 +87,7 @@ app.post('/api/login', async (req, res) => {
       });
     }
   } catch (error) {
+    console.error('Error en login:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -543,6 +558,32 @@ app.post('/api/cotizaciones/:id/items', async (req, res) => {
 });
 
 
+// --- NUEVO: ENDPOINT DE CHAT CON IA ---
+app.post('/api/ai/chat', async (req, res) => {
+  const { message, history } = req.body;
+  if (!message) return res.status(400).json({ error: 'Mensaje requerido' });
+
+  try {
+    const chat = model.startChat({
+      history: (history || [])
+        .filter((h, idx) => idx > 0 || h.role === 'user') // Gemini requiere que el primer mensaje sea del usuario
+        .map(h => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.content }]
+        })),
+    });
+
+    const result = await chat.sendMessage(message);
+    const responseText = result.response.text();
+
+    res.json({ response: responseText });
+  } catch (error) {
+    console.error('Error Gemini:', error);
+    res.status(500).json({ error: 'Error al procesar con IA: ' + error.message });
+  }
+});
+
+
 /**
  * =========================================================================
  * INICIO DEL SERVIDOR
@@ -552,5 +593,5 @@ app.listen(4000, '0.0.0.0', () => {
 
 
 
-    console.log('API Multillantas Nieto corriendo en puerto 4000 (v500 lines)');
+    console.log('API Multillantas Nieto corriendo en puerto 4000 (v550 lines + AI)');
 });

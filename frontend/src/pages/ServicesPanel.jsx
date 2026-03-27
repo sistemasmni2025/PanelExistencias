@@ -4,6 +4,7 @@ import ServicesHeader from '../components/layout/ServicesHeader';
 import DataGrid from '../components/services/DataGrid';
 import PrimasFdnPanel from '../components/services/PrimasFdnPanel';
 import CartDrawer from '../components/cart/CartDrawer';
+import ChatBot from '../components/ai/ChatBot';
 import PromoBanner from '../components/layout/PromoBanner';
 import { Menu, XCircle, Home, LogOut, FileText, Truck, Loader2 } from 'lucide-react';
 import API_BASE_URL from '../services/apiConfig';
@@ -293,6 +294,9 @@ const ServicesPanel = ({ onNavigateHome, onNavigateOrders, onLogout, user }) => 
         onClear={handleClearCart}
         sucursal={user?.SucursalNombre}
       />
+
+      {/* AI Assistant Floating UI */}
+      <ChatBot onFilterUpdate={handleFilterChange} />
     </div>
   );
 };
