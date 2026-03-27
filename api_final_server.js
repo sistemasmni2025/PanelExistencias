@@ -19,17 +19,42 @@ const pool = mysql.createPool({
   port: 3306
 });
 
-// Configuración de Google Gemini
+// Configuración de Google Gemini (Versión 2.0 con Tools)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Definición de Funciones para el Bot (Herramientas)
+const tools = [
+  {
+    functionDeclarations: [
+      {
+        name: "buscarProductos",
+        description: "Busca productos en el catálogo por nombre, dimensiones o clave. Retorna descripción, clave, estatus y precio de lista.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            query: { type: "STRING", description: "Texto de búsqueda (ej: 'michelin 205/55R16')" }
+          },
+          required: ["query"]
+        }
+      },
+      {
+        name: "consultarExistencias",
+        description: "Consulta el stock disponible por sucursal para un producto específico usando su clave.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            clave: { type: "STRING", description: "La clave única del producto (ej: '100456')" }
+          },
+          required: ["clave"]
+        }
+      }
+    ]
+  }
+];
+
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash",
-  systemInstruction: `Eres un asistente experto de Multillantas Nieto. Tu trabajo es ayudar a los vendedores a encontrar llantas en el inventario.
-  Analiza el mensaje del usuario y extrae los filtros técnicos: ancho, serie, rin, marca, clase.
-  - marcas posibles: MICHELIN, BFGOODRICH, UNIROYAL, CONTINENTAL, ROVELO, TOYO, etc.
-  - clases: Auto / Camioneta, Camión, MueveTierra, Industrial, Agrícola, Motocicleta.
-  
-  Responde de forma natural y AMABLE. Al final de tu respuesta, SIEMPRE incluye un bloque de código JSON con los filtros detectados.
-  Ejemplo de JSON: {"filters": {"ancho": "275", "serie": "80", "rin": "22.5", "marca": ["MICHELIN"], "clase": "Camión", "isGamma": true}}`
+  model: "gemini-2.0-flash",
+  tools: tools
 });
 
 
@@ -558,28 +583,75 @@ app.post('/api/cotizaciones/:id/items', async (req, res) => {
 });
 
 
-// --- NUEVO: ENDPOINT DE CHAT CON IA ---
+// --- NUEVO: ENDPOINT DE CHAT CON IA (CON FUNCTION CALLING Y REGLAS ESTRICTAS) ---
 app.post('/api/ai/chat', async (req, res) => {
   const { message, history } = req.body;
   if (!message) return res.status(400).json({ error: 'Mensaje requerido' });
 
   try {
+    const systemPrompt = `INSTRUCCIONES CRÍTICAS PARA EL ASISTENTE NIETO:
+1. Eres un ASISTENTE TÉCNICO INFORMATIVO. Tu único objetivo es proveer datos, precios y existencias.
+2. PROHIBIDO: Bajo ninguna circunstancia menciones "comprar", "añadir al carrito", "realizar pedido" o "generar venta". Eres solo un informador visual.
+3. Si el usuario saluda ("hola", "qué tal"), responde muy brevemente: "¡Hola! Soy tu asistente. ¿En qué información técnica puedo ayudarte hoy?" y NO repitas este saludo después.
+4. Si detectas que el usuario quiere "VER" (ej: "muéstrame llantas 295/80"), genera una respuesta amable pero SIEMPRE incluye al final un bloque JSON con los filtros detectados: {"filters": {"ancho": "...", "rin": "...", "marca": ["..."]}}.
+5. Usa las herramientas buscarProductos y consultarExistencias para dar PRECIOS Y STOCK REAL cuando te lo pregunten.`;
+
     const chat = model.startChat({
       history: (history || [])
-        .filter((h, idx) => idx > 0 || h.role === 'user') // Gemini requiere que el primer mensaje sea del usuario
+        .filter((h, idx) => idx > 0 || h.role === 'user')
         .map(h => ({
           role: h.role === 'user' ? 'user' : 'model',
           parts: [{ text: h.content }]
         })),
     });
 
-    const result = await chat.sendMessage(message);
-    const responseText = result.response.text();
+    // Enviar instrucción + mensaje
+    let result = await chat.sendMessage(systemPrompt + "\n\nUSUARIO: " + message);
+    let response = result.response;
+    let parts = response.candidates[0].content.parts;
+    let call = parts.find(p => p.functionCall);
 
-    res.json({ response: responseText });
+    // Manejo de llamadas a funciones (Bucle de herramientas)
+    while (call) {
+      const { name, args } = call.functionCall;
+      let functionResponseData;
+
+      if (name === "buscarProductos") {
+        // Hacemos la búsqueda más flexible (convierte espacios/barras en comodines %)
+        const flexibleQuery = args.query.replace(/[\/\s-]/g, '%');
+        const [rows] = await pool.query(
+          "SELECT a.ALMNOM as Descripcion, a.almcve as Clave, a.almstat as Status, a.almplist as Precio FROM almcat a WHERE a.ALMNOM LIKE ? OR a.almcve LIKE ? LIMIT 5",
+          [`%${flexibleQuery}%`, `%${args.query}%`]
+        );
+        functionResponseData = rows;
+      } 
+      else if (name === "consultarExistencias") {
+        const [rows] = await pool.query(
+          "SELECT s.SucursalAbreviacion as Sucursal, sa.almstock as Stock FROM sucursalarticulo sa JOIN sucursal s ON sa.SucursalId = s.SucursalId WHERE sa.almcve = ? AND sa.almstock > 0",
+          [args.clave]
+        );
+        functionResponseData = rows;
+      }
+
+      // Devolver el resultado a la IA para que formule la respuesta final
+      result = await chat.sendMessage([{
+        functionResponse: {
+          name: name,
+          response: { content: functionResponseData }
+        }
+      }]);
+      
+      response = result.response;
+      parts = response.candidates[0].content.parts;
+      call = parts.find(p => p.functionCall);
+    }
+
+    const finalResponse = response.text();
+    res.json({ response: finalResponse });
+
   } catch (error) {
-    console.error('Error Gemini:', error);
-    res.status(500).json({ error: 'Error al procesar con IA: ' + error.message });
+    console.error('Error Gemini Advanced:', error);
+    res.status(500).json({ error: 'Error en Asistente: ' + error.message });
   }
 });
 

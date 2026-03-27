@@ -6,7 +6,7 @@ const ChatBot = ({ onFilterUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([
-    { role: 'assistant', content: '¡Hola! Soy tu asistente de Multillantas Nieto. ¿En qué puedo ayudarte a buscar hoy?' }
+    { role: 'assistant', content: '¿Hola! Soy tu asistente técnico de Multillantas Nieto. ¿En qué información de llantas o stock puedo apoyarte hoy?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
@@ -29,7 +29,11 @@ const ChatBot = ({ onFilterUpdate }) => {
       const response = await fetch(`${API_BASE_URL}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, history: chatHistory.slice(-6) })
+        body: JSON.stringify({ 
+          message: userMsg, 
+          // Solo enviamos el historial DE VERDAD (omitimos el saludo inicial estático)
+          history: chatHistory.length > 1 ? chatHistory.slice(1, 7) : [] 
+        })
       });
 
       const data = await response.json();
@@ -40,7 +44,8 @@ const ChatBot = ({ onFilterUpdate }) => {
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.filters) {
+          // Solo actualizamos si detectamos filtros REALES (evita resets accidentales)
+          if (parsed.filters && Object.values(parsed.filters).some(v => v !== "" && (Array.isArray(v) ? v.length > 0 : true))) {
             onFilterUpdate(parsed.filters);
           }
         } catch (e) {
