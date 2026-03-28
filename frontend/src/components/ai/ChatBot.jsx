@@ -53,7 +53,13 @@ const ChatBot = ({ onFilterUpdate }) => {
         }
       }
 
-      setChatHistory(prev => [...prev, { role: 'assistant', content: aiResponse.replace(/```json[\s\S]*?```/g, '').trim() }]);
+      // Limpiamos la respuesta para el usuario (quitamos el bloque JSON)
+      const cleanContent = aiResponse
+        .replace(/```json[\s\S]*?```/g, '') // Quita bloques de markdown
+        .replace(/\{[\s\S]*"filters"[\s\S]*\}/, '') // Quita JSON plano
+        .trim();
+
+      setChatHistory(prev => [...prev, { role: 'assistant', content: cleanContent }]);
     } catch (error) {
       setChatHistory(prev => [...prev, { role: 'assistant', content: 'Lo siento, hubo un error al conectar con el cerebro de IA.' }]);
     } finally {

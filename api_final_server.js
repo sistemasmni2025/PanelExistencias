@@ -19,31 +19,30 @@ const pool = mysql.createPool({
   port: 3306
 });
 
-// Configuración de Google Gemini (Versión 2.0 con Tools)
+// 1. CONFIGURACIÓN DEL MODELO Y ENTRENAMIENTO (PROMPT MAESTRO)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Definición de Funciones para el Bot (Herramientas)
 const tools = [
   {
     functionDeclarations: [
       {
         name: "buscarProductos",
-        description: "Busca productos en el catálogo por nombre, dimensiones o clave. Retorna descripción, clave, estatus y precio de lista.",
+        description: "Busca productos en el catálogo por nombre, dimensiones, marca o categoría.",
         parameters: {
           type: "OBJECT",
           properties: {
-            query: { type: "STRING", description: "Texto de búsqueda (ej: 'michelin 205/55R16')" }
+            query: { type: "STRING", description: "Texto de búsqueda (ej: 'michelin 205/55R16' o 'camión rin 22.5')" }
           },
           required: ["query"]
         }
       },
       {
         name: "consultarExistencias",
-        description: "Consulta el stock disponible por sucursal para un producto específico usando su clave.",
+        description: "Consulta el stock físico por sucursal. REQUIERE LA CLAVE.",
         parameters: {
           type: "OBJECT",
           properties: {
-            clave: { type: "STRING", description: "La clave única del producto (ej: '100456')" }
+            clave: { type: "STRING", description: "Clave única del producto" }
           },
           required: ["clave"]
         }
@@ -53,7 +52,18 @@ const tools = [
 ];
 
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
+  systemInstruction: `USTED ES EL ASESOR TÉCNICO VIRTUAL DE "MULTILLANTAS NIETO". Su función es proporcionar asesoría profesional, precisa y cortés sobre nuestro catálogo de neumáticos y servicios.
+
+    ### PERFIL DE COMUNICACIÓN:
+    - TONO: Profesional, formal y servicial (Usted). Use términos correctos: "Neumático", "Existencias", "Precio Neto". Prohibido el lenguaje informal ("no te agüites", "patas", etc.).
+    - COHERENCIA DE DATOS: Si la herramienta "buscarProductos" devuelve resultados, los productos EXISTEN en catálogo. ¡NUNCA diga que no hay si el sistema le dio datos!
+    - LISTADO OBLIGATORIO: Siempre que encuentre neumáticos, presente una lista clara con el nombre del modelo y su Precio Neto.
+    - CAPAS DE INFORMACIÓN:
+       - Catálogo (buscarProductos): Información de venta y precios.
+       - Existencias (consultarExistencias): Inventario físico real en sucursales.
+    5. MANEJO DE STOCK: Si hay en catálogo pero no en stock físico, explique que el inventario físico está agotado temporalmente pero el modelo se maneja.
+    6. ACTUALIZACIÓN VISUAL: Al final de cada respuesta técnica, debe incluir el bloque JSON: {"filters": {"ancho": "...", "serie": "...", "rin": "...", "marca": ["..."]}}. No incluya marcas que dejen la cuadrícula vacía.`,
   tools: tools
 });
 
@@ -589,13 +599,6 @@ app.post('/api/ai/chat', async (req, res) => {
   if (!message) return res.status(400).json({ error: 'Mensaje requerido' });
 
   try {
-    const systemPrompt = `INSTRUCCIONES CRÍTICAS PARA EL ASISTENTE NIETO:
-1. Eres un ASISTENTE TÉCNICO INFORMATIVO. Tu único objetivo es proveer datos, precios y existencias.
-2. PROHIBIDO: Bajo ninguna circunstancia menciones "comprar", "añadir al carrito", "realizar pedido" o "generar venta". Eres solo un informador visual.
-3. Si el usuario saluda ("hola", "qué tal"), responde muy brevemente: "¡Hola! Soy tu asistente. ¿En qué información técnica puedo ayudarte hoy?" y NO repitas este saludo después.
-4. Si detectas que el usuario quiere "VER" (ej: "muéstrame llantas 295/80"), genera una respuesta amable pero SIEMPRE incluye al final un bloque JSON con los filtros detectados: {"filters": {"ancho": "...", "rin": "...", "marca": ["..."]}}.
-5. Usa las herramientas buscarProductos y consultarExistencias para dar PRECIOS Y STOCK REAL cuando te lo pregunten.`;
-
     const chat = model.startChat({
       history: (history || [])
         .filter((h, idx) => idx > 0 || h.role === 'user')
@@ -605,23 +608,24 @@ app.post('/api/ai/chat', async (req, res) => {
         })),
     });
 
-    // Enviar instrucción + mensaje
-    let result = await chat.sendMessage(systemPrompt + "\n\nUSUARIO: " + message);
+    let result = await chat.sendMessage(message);
     let response = result.response;
     let parts = response.candidates[0].content.parts;
     let call = parts.find(p => p.functionCall);
 
-    // Manejo de llamadas a funciones (Bucle de herramientas)
+    // Bucle de herramientas para precisión de datos
     while (call) {
       const { name, args } = call.functionCall;
-      let functionResponseData;
+      let functionResponseData = [];
 
       if (name === "buscarProductos") {
-        // Hacemos la búsqueda más flexible (convierte espacios/barras en comodines %)
-        const flexibleQuery = args.query.replace(/[\/\s-]/g, '%');
+        // Búsqueda flexible separando palabras por comodines %
+        const words = (args.query || '').split(' ').filter(w => w.length > 1);
+        const searchPattern = '%' + words.join('%') + '%';
+        
         const [rows] = await pool.query(
-          "SELECT a.ALMNOM as Descripcion, a.almcve as Clave, a.almstat as Status, a.almplist as Precio FROM almcat a WHERE a.ALMNOM LIKE ? OR a.almcve LIKE ? LIMIT 5",
-          [`%${flexibleQuery}%`, `%${args.query}%`]
+          "SELECT a.ALMNOM as Descripcion, a.almcve as Clave, a.almstat as Status, a.almplist as Precio FROM almcat a WHERE a.ALMNOM LIKE ? OR a.almcve LIKE ? LIMIT 10",
+          [searchPattern, `%${args.query}%`]
         );
         functionResponseData = rows;
       } 
@@ -633,7 +637,6 @@ app.post('/api/ai/chat', async (req, res) => {
         functionResponseData = rows;
       }
 
-      // Devolver el resultado a la IA para que formule la respuesta final
       result = await chat.sendMessage([{
         functionResponse: {
           name: name,
@@ -646,12 +649,17 @@ app.post('/api/ai/chat', async (req, res) => {
       call = parts.find(p => p.functionCall);
     }
 
-    const finalResponse = response.text();
-    res.json({ response: finalResponse });
+    res.json({ response: response.text() });
 
   } catch (error) {
-    console.error('Error Gemini Advanced:', error);
-    res.status(500).json({ error: 'Error en Asistente: ' + error.message });
+    console.error('Error Crítico Bot:', error);
+    // Manejo de cuota de Google (Plan Free)
+    if (error.status === 429 || error.message.includes('429')) {
+      return res.status(200).json({ 
+        response: "⚠️ Estamos atendiendo demasiadas consultas por los minutos permitidos en el plan gratuito. Por favor, reintenta en unos instantes." 
+      });
+    }
+    res.status(500).json({ error: 'Error: ' + error.message });
   }
 });
 
@@ -665,5 +673,5 @@ app.listen(4000, '0.0.0.0', () => {
 
 
 
-    console.log('API Multillantas Nieto corriendo en puerto 4000 (v550 lines + AI)');
+    console.log('API Multillantas Nieto corriendo en puerto 4000 (vPREMIUM_HUMAN_ADVISOR - 650+ lines)');
 });
