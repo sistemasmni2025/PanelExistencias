@@ -9,14 +9,55 @@ const ChatBot = ({ onFilterUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState([
-    { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO ¿En qué puedo apoyarte hoy?' }
-  ]);
+  
+  // Cargar historial persistente o inicializar
+  const [chatHistory, setChatHistory] = useState(() => {
+    const saved = localStorage.getItem('chatHistory');
+    return saved ? JSON.parse(saved) : [
+      { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO ¿En qué puedo ayudarte el día hoy?', timestamp: Date.now() }
+    ];
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
   const chatWindowRef = useRef(null);
 
-  // Intervalo para el mensaje "Necesitas Ayuda??" cada 15 segundos
+  // Guardar historial en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }, [chatHistory]);
+
+  // Forzar scroll al fondo al abrir el chat
+  useEffect(() => {
+    if (isOpen && scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }, 100);
+    }
+  }, [isOpen]);
+
+  // Lógica de separador de fechas
+  const formatDateDivider = (timestamp) => {
+    if (!timestamp) return null;
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    if (isToday) return 'HOY';
+    if (isYesterday) return 'AYER';
+    
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: 'long',
+      year: 'numeric'
+    }).toUpperCase();
+  };
+
+  // Intervalo para el mensaje "Necesitas Ayuda??" cada 7 segundos
   useEffect(() => {
     if (isOpen) {
       setShowHelp(false);
@@ -58,14 +99,19 @@ const ChatBot = ({ onFilterUpdate }) => {
     if (!message.trim() || isLoading) return;
     const userMsg = message.trim();
     setMessage('');
-    setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
+    
+    const timestamp = Date.now();
+    setChatHistory(prev => [...prev, { role: 'user', content: userMsg, timestamp }]);
     setIsLoading(true);
 
     try {
       const response = await fetch(`${API_BASE_URL}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, history: chatHistory.length > 1 ? chatHistory.slice(1, 7) : [] })
+        body: JSON.stringify({ 
+          message: userMsg, 
+          history: chatHistory.length > 1 ? chatHistory.slice(1, 7).map(({role, content}) => ({role, content})) : [] 
+        })
       });
       const data = await response.json();
       const aiResponse = data.response;
@@ -79,9 +125,9 @@ const ChatBot = ({ onFilterUpdate }) => {
         } catch (e) { console.error("Error AI filters:", e); }
       }
       const cleanContent = aiResponse.replace(/```json[\s\S]*?```/g, '').replace(/\{[\s\S]*"filters"[\s\S]*\}/, '').trim();
-      setChatHistory(prev => [...prev, { role: 'assistant', content: cleanContent }]);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: cleanContent, timestamp: Date.now() }]);
     } catch (error) {
-      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Cerca de una interrupción. ¿Repetir consulta?' }]);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Cerca de una interrupción. ¿Repetir consulta?', timestamp: Date.now() }]);
     } finally {
       setIsLoading(false);
     }
@@ -148,21 +194,36 @@ const ChatBot = ({ onFilterUpdate }) => {
 
           {/* Chat Area Limpia (Blanca) */}
           <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-white custom-scrollbar" ref={scrollRef}>
-            {chatHistory.map((chat, i) => (
-              <div key={i} className={`flex items-start ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {chat.role === 'assistant' && (
-                  <div className="w-6 h-6 mr-3 mt-1 overflow-hidden rounded-md">
-                    <img src={michelinZoomIcon} alt="N" className="w-full h-full object-contain" />
+            {chatHistory.map((chat, i) => {
+              const currentDivider = formatDateDivider(chat.timestamp);
+              const prevDivider = i > 0 ? formatDateDivider(chatHistory[i-1].timestamp) : null;
+              const showDivider = currentDivider !== prevDivider;
+
+              return (
+                <React.Fragment key={i}>
+                  {showDivider && (
+                    <div className="flex justify-center my-6">
+                      <span className="bg-slate-100 text-slate-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-slate-50">
+                        {currentDivider}
+                      </span>
+                    </div>
+                  )}
+                  <div className={`flex items-start ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {chat.role === 'assistant' && (
+                      <div className="w-6 h-6 mr-3 mt-1 overflow-hidden rounded-md">
+                        <img src={michelinZoomIcon} alt="N" className="w-full h-full object-contain" />
+                      </div>
+                    )}
+                    <div className={`max-w-[85%] px-4 py-3 text-[14px] leading-relaxed relative ${chat.role === 'user'
+                      ? 'bg-[#003d7a] text-white rounded-[1.2rem] rounded-tr-none shadow-md shadow-blue-100'
+                      : 'bg-slate-50 text-slate-700 rounded-[1.2rem] rounded-tl-none border border-slate-100'
+                      }`}>
+                      <div className="whitespace-pre-wrap">{chat.content}</div>
+                    </div>
                   </div>
-                )}
-                <div className={`max-w-[85%] px-4 py-3 text-[14px] leading-relaxed relative ${chat.role === 'user'
-                  ? 'bg-[#003d7a] text-white rounded-[1.2rem] rounded-tr-none shadow-md shadow-blue-100'
-                  : 'bg-slate-50 text-slate-700 rounded-[1.2rem] rounded-tl-none border border-slate-100'
-                  }`}>
-                  <div className="whitespace-pre-wrap">{chat.content}</div>
-                </div>
-              </div>
-            ))}
+                </React.Fragment>
+              );
+            })}
             {isLoading && (
               <div className="flex justify-start items-center">
                 <div className="w-6 h-6 mr-3 overflow-hidden rounded-md opacity-50">

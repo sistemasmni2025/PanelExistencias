@@ -23,6 +23,7 @@ function App() {
     setIsAuthenticated(false);
     sessionStorage.removeItem('isAuthenticated');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('chatHistory'); // Limpiar historial del chat al cerrar sesión
   };
 
   // Activity Tracker for 5 minutes auto-logout
