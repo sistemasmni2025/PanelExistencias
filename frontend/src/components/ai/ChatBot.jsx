@@ -1,25 +1,61 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import { Send, X, Sparkles } from 'lucide-react';
 import API_BASE_URL from '../../services/apiConfig';
+import michelinIcon from '../../assets/logo/michelin_icon.png';
+import michelinZoomIcon from '../../assets/logo/michelin_zoom.png';
+import nietoLogoN from '../../assets/logo/nieto_n.png';
 
 const ChatBot = ({ onFilterUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
   const [chatHistory, setChatHistory] = useState([
-    { role: 'assistant', content: '¿Hola! Soy tu asistente técnico de Multillantas Nieto. ¿En qué información de llantas o stock puedo apoyarte hoy?' }
+    { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO ¿En qué puedo apoyarte hoy?' }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
+  const chatWindowRef = useRef(null);
+
+  // Intervalo para el mensaje "Necesitas Ayuda??" cada 15 segundos
+  useEffect(() => {
+    if (isOpen) {
+      setShowHelp(false);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      // Solo mostrar si sigue cerrado
+      if (!isOpen) {
+        setShowHelp(true);
+        setTimeout(() => setShowHelp(false), 5000);
+      }
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (chatWindowRef.current && !chatWindowRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, isLoading]);
 
   const handleSend = async () => {
     if (!message.trim() || isLoading) return;
-
     const userMsg = message.trim();
     setMessage('');
     setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
@@ -29,120 +65,143 @@ const ChatBot = ({ onFilterUpdate }) => {
       const response = await fetch(`${API_BASE_URL}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMsg, 
-          // Solo enviamos el historial DE VERDAD (omitimos el saludo inicial estático)
-          history: chatHistory.length > 1 ? chatHistory.slice(1, 7) : [] 
-        })
+        body: JSON.stringify({ message: userMsg, history: chatHistory.length > 1 ? chatHistory.slice(1, 7) : [] })
       });
-
       const data = await response.json();
       const aiResponse = data.response;
-
-      // Extract JSON filters if present
       const jsonMatch = aiResponse.match(/\{[\s\S]*"filters"[\s\S]*\}/);
       if (jsonMatch) {
         try {
           const parsed = JSON.parse(jsonMatch[0]);
-          // Solo actualizamos si detectamos filtros REALES (evita resets accidentales)
           if (parsed.filters && Object.values(parsed.filters).some(v => v !== "" && (Array.isArray(v) ? v.length > 0 : true))) {
             onFilterUpdate(parsed.filters);
           }
-        } catch (e) {
-          console.error("Error parsing AI filters:", e);
-        }
+        } catch (e) { console.error("Error AI filters:", e); }
       }
-
-      // Limpiamos la respuesta para el usuario (quitamos el bloque JSON)
-      const cleanContent = aiResponse
-        .replace(/```json[\s\S]*?```/g, '') // Quita bloques de markdown
-        .replace(/\{[\s\S]*"filters"[\s\S]*\}/, '') // Quita JSON plano
-        .trim();
-
+      const cleanContent = aiResponse.replace(/```json[\s\S]*?```/g, '').replace(/\{[\s\S]*"filters"[\s\S]*\}/, '').trim();
       setChatHistory(prev => [...prev, { role: 'assistant', content: cleanContent }]);
     } catch (error) {
-      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Lo siento, hubo un error al conectar con el cerebro de IA.' }]);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Cerca de una interrupción. ¿Repetir consulta?' }]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] font-sans">
-      {/* Botón Flotante */}
+    <div className="fixed bottom-6 right-6 z-[100] font-sans text-slate-700">
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-[#003d7a] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95 group relative"
-        >
-          <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-20"></div>
-          <Sparkles className="w-6 h-6" />
-        </button>
+        <div className="relative group">
+          {/* Globo de Ayuda Discreto */}
+          {showHelp && (
+            <div className="absolute bottom-16 right-0 bg-white px-4 py-2 rounded-2xl shadow-xl border border-slate-100 animate-bounce-subtle whitespace-nowrap z-[110]">
+              <p className="text-[12px] font-bold text-[#003d7a]">¿Necesitas Ayuda??</p>
+              <div className="absolute bottom-[-6px] right-6 w-3 h-3 bg-white border-r border-b border-slate-100 rotate-45"></div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setIsOpen(true)}
+            className="w-12 h-12 bg-[#ffce00] rounded-full shadow-[0_12px_45px_rgba(255,206,0,0.4)] flex items-center justify-center hover:scale-110 transition-all active:scale-95 group relative border-2 border-white"
+          >
+            {/* Efecto de Ondas Azul Nieto Atenuadas (Ahora visibles) */}
+            <div className="absolute inset-0 bg-[#003d7a]/25 rounded-full animate-ping"></div>
+            <div className="absolute inset-0 bg-[#003d7a]/15 rounded-full animate-ping [animation-delay:0.8s]"></div>
+            <div className="absolute inset-0 bg-[#003d7a]/10 rounded-full animate-pulse scale-105"></div>
+
+            <img
+              src={michelinZoomIcon}
+              alt="Michelin"
+              className="w-full h-full object-cover rounded-full relative z-10 border-none"
+            />
+          </button>
+        </div>
       )}
 
-      {/* Ventana de Chat */}
       {isOpen && (
-        <div className="w-[350px] sm:w-[400px] h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-slide-up">
-          {/* Header */}
-          <div className="p-4 bg-[#003d7a] text-white flex items-center justify-between">
+        <div
+          ref={chatWindowRef}
+          className="w-[330px] sm:w-[350px] h-[500px] bg-white rounded-[2rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-slate-100 animate-slide-up"
+        >
+          {/* Header Contrast Blue & White Body */}
+          <div className="p-4 bg-gradient-to-r from-[#003d7a] to-[#005bb7] flex items-center justify-between relative shadow-md">
+            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-[#ffce00]"></div>
+
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                <Bot className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-black uppercase tracking-wider">Asistente Nieto</h3>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-[10px] font-bold text-white/60 uppercase">En línea</span>
+              <div className="relative">
+                <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-inner border border-slate-100 overflow-hidden">
+                  <img src={michelinZoomIcon} alt="Michelin Logo" className="w-full h-full object-contain" />
                 </div>
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#003d7a] rounded-full animate-pulse shadow-sm"></div>
+              </div>
+              <div className="flex flex-col">
+                <h3 className="text-[15px] font-black uppercase tracking-tight text-white leading-none italic">
+                  Asesor <span className="text-[#ffce00]">Nieto</span>
+                </h3>
+                <span className="text-[9px] font-bold text-blue-100/70 mt-1 uppercase tracking-widest leading-none">En Linea</span>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1.5 rounded-lg transition-colors">
-              <X className="w-5 h-5" />
+
+            <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-2 rounded-xl transition-all">
+              <X className="w-6 h-6 text-[#ffce00]" />
             </button>
           </div>
 
-          {/* Messages Container */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar" ref={scrollRef}>
+          {/* Chat Area Limpia (Blanca) */}
+          <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-white custom-scrollbar" ref={scrollRef}>
             {chatHistory.map((chat, i) => (
-              <div key={i} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${
-                  chat.role === 'user' 
-                    ? 'bg-[#003d7a] text-white rounded-tr-none' 
-                    : 'bg-white text-slate-700 rounded-tl-none border border-slate-100'
-                }`}>
-                  {chat.role === 'assistant' && <div className="text-[9px] font-black uppercase text-slate-400 mb-1 leading-none">IA Multillantas</div>}
-                  {chat.content}
+              <div key={i} className={`flex items-start ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                {chat.role === 'assistant' && (
+                  <div className="w-6 h-6 mr-3 mt-1 overflow-hidden rounded-md">
+                    <img src={michelinZoomIcon} alt="N" className="w-full h-full object-contain" />
+                  </div>
+                )}
+                <div className={`max-w-[85%] px-4 py-3 text-[14px] leading-relaxed relative ${chat.role === 'user'
+                  ? 'bg-[#003d7a] text-white rounded-[1.2rem] rounded-tr-none shadow-md shadow-blue-100'
+                  : 'bg-slate-50 text-slate-700 rounded-[1.2rem] rounded-tl-none border border-slate-100'
+                  }`}>
+                  <div className="whitespace-pre-wrap">{chat.content}</div>
                 </div>
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 text-[#003d7a] animate-spin" />
-                  <span className="text-[11px] font-bold text-slate-400 uppercase">Pensando...</span>
+              <div className="flex justify-start items-center">
+                <div className="w-6 h-6 mr-3 overflow-hidden rounded-md opacity-50">
+                  <img src={michelinZoomIcon} alt="N" className="w-full h-full object-contain animate-pulse" />
+                </div>
+                <div className="bg-slate-50 px-4 py-3 rounded-[1.2rem] rounded-tl-none border border-slate-100 flex gap-1.5 items-center">
+                  <div className="w-1.5 h-1.5 bg-[#003d7a] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-1.5 h-1.5 bg-[#ffce00] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-1.5 h-1.5 bg-[#003d7a] rounded-full animate-bounce"></div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Input Area */}
-          <div className="p-4 bg-white border-t border-slate-100 flex gap-2">
-            <input
-              type="text"
-              placeholder="Escribe tu consulta..."
-              className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2.5 text-[13px] focus:ring-2 focus:ring-[#003d7a] transition-all"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            />
-            <button
-              onClick={handleSend}
-              className="bg-[#003d7a] text-white p-2.5 rounded-xl hover:bg-blue-900 transition-all disabled:opacity-50"
-              disabled={isLoading || !message.trim()}
-            >
-              <Send className="w-5 h-5" />
-            </button>
+          {/* Input Area Simple */}
+          <div className="p-4 bg-white border-t border-slate-50">
+            <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-[1.5rem] overflow-hidden focus-within:ring-4 focus-within:ring-blue-50 focus-within:border-[#003d7a]/30 focus-within:bg-white transition-all shadow-inner">
+              <input
+                type="text"
+                placeholder="Escribe tu consulta aquí..."
+                className="w-full bg-transparent border-none pl-5 pr-14 py-4 text-[14px] text-slate-800 placeholder:text-slate-300 focus:outline-none font-medium"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              />
+              <button
+                onClick={handleSend}
+                className={`absolute right-1 w-11 h-11 rounded-xl flex items-center justify-center transition-all ${isLoading || !message.trim()
+                  ? 'text-slate-200'
+                  : 'bg-[#003d7a] text-[#ffce00] shadow-sm hover:bg-[#002d5a] active:scale-95'
+                  }`}
+                disabled={isLoading || !message.trim()}
+              >
+                <Send className="w-5 h-5 ml-0.5" />
+              </button>
+            </div>
+            <div className="text-center mt-3">
+              <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest leading-none">Multillantas Nieto © 2026</p>
+            </div>
           </div>
         </div>
       )}
