@@ -114,7 +114,18 @@ const ChatBot = ({ onFilterUpdate }) => {
         })
       });
       const data = await response.json();
+      
+      if (data.error) {
+        setChatHistory(prev => [...prev, { role: 'assistant', content: data.error, timestamp: Date.now() }]);
+        setIsLoading(false);
+        return;
+      }
+
       const aiResponse = data.response;
+      if (!aiResponse) {
+        throw new Error('Sin respuesta del servidor');
+      }
+
       const jsonMatch = aiResponse.match(/\{[\s\S]*"filters"[\s\S]*\}/);
       if (jsonMatch) {
         try {
@@ -177,13 +188,15 @@ const ChatBot = ({ onFilterUpdate }) => {
                 <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-inner border border-slate-100 overflow-hidden">
                   <img src={michelinZoomIcon} alt="Michelin Logo" className="w-full h-full object-contain" />
                 </div>
-                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#003d7a] rounded-full animate-pulse shadow-sm"></div>
               </div>
               <div className="flex flex-col">
                 <h3 className="text-[15px] font-black uppercase tracking-tight text-white leading-none italic">
                   Asesor <span className="text-[#ffce00]">Nieto</span>
                 </h3>
-                <span className="text-[9px] font-bold text-blue-100/70 mt-1 uppercase tracking-widest leading-none">En Linea</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-sm"></div>
+                  <span className="text-[9px] font-bold text-blue-100/70 uppercase tracking-widest leading-none">En Linea</span>
+                </div>
               </div>
             </div>
 

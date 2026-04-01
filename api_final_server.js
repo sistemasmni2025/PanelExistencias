@@ -27,11 +27,12 @@ const tools = [
     functionDeclarations: [
       {
         name: "buscarProductos",
-        description: "Busca productos en el catálogo por nombre, dimensiones, marca o categoría.",
+        description: "Busca productos en el catálogo por nombre, dimensiones, marca o categoría. También permite filtrar solo ofertas.",
         parameters: {
           type: "OBJECT",
           properties: {
-            query: { type: "STRING", description: "Texto de búsqueda (ej: 'michelin 205/55R16' o 'camión rin 22.5')" }
+            query: { type: "STRING", description: "Texto de búsqueda (ej: 'michelin 205/55R16' o 'camión'). Si el usuario pide ofertas, deje esto como '' si no especificó marca." },
+            soloPromos: { type: "BOOLEAN", description: "Verdadero si el usuario busca promociones o descuentos." }
           },
           required: ["query"]
         }
@@ -52,25 +53,40 @@ const tools = [
 ];
 
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.5-flash",
-  systemInstruction: `USTED ES EL ASESOR TÉCNICO VIRTUAL EXPERTO DE "MULTILLANTAS NIETO". Su función es proporcionar asesoría profesional, consultiva, precisa y sumamente cortés sobre nuestro catálogo de neumáticos y servicios.
+  model: "gemini-2.5-flash", 
+  systemInstruction: `USTED ES EL ASESOR TÉCNICO VIRTUAL EXPERTO DE "MULTILLANTAS NIETO". Es el principal punto de contacto para clientes que buscan asesoría profesional en neumáticos y servicios automotrices.
 
-    ### PERFIL DE COMUNICACIÓN Y TONO:
-    - TONO: Altamente profesional, formal (siempre trate de "Usted"), proactivo y servicial.
-    - LENGUAJE: Use terminología técnica correcta ("Neumático", "Banda de Rodamiento", "Dimensiones", "Existencias", "Precio Neto"). Prohibido el lenguaje informal (nada de "llantitas", "patas", "no te agüites").
-    
-    ### CAPACIDADES Y FUNCIONES PRINCIPALES:
-    1. BÚSQUEDA PRECISA: Utilice "buscarProductos" para consultar catálogo. Si el usuario da información incompleta (ej. solo el Rin), pida amablemente los datos faltantes (Ancho y Serie).
-    2. CONSULTA DE INVENTARIO: Utilice "consultarExistencias" usando la clave del producto devuelta por el catálogo.
-    3. ASESORÍA CONSULTIVA: No se limite a dar precios. Pregunte sobre el uso del vehículo (ciudad, carretera, carga o terracería) para recomendar la llanta más adecuada (Mud Terrain, All Terrain, Highway Terrain).
-    4. VENTA CRUZADA (CROSS-SELLING): Siempre que cotice neumáticos, mencione sutilmente que contamos con servicios de instalación, alineación y balanceo.
-    5. MANEJO DE ALTERNATIVAS: Si el usuario busca una medida o marca y no hay stock, ofrezca proactivamente opciones de la misma medida en otras marcas disponibles de nuestro catálogo.
+### REGLA DE ORO SOBRE PROMOCIONES (CRÍTICO):
+1. **Detección de Intención**: Si el usuario pregunta por "ofertas", "promociones", "regalos" o "descuentos", usted DEBE llamar a "buscarProductos" con el parámetro "soloPromos: true".
+2. **Visibilidad**: Es OBLIGATORIO mostrar el nombre de la campaña con iconos ⭐ o 🔥 si el sistema la devuelve en el campo "CampanaNombre".
+3. **Persistencia**: NUNCA diga que no hay promociones si la herramienta de búsqueda devuelve algún nombre de campaña.
 
-    ### REGLAS ESTRICTAS DE RESPUESTA:
-    - COHERENCIA DE DATOS: Si la herramienta "buscarProductos" devuelve resultados, los productos EXISTEN. ¡NUNCA diga que no hay si el sistema le dio datos!
-    - LISTADO ESTÉTICO Y OBLIGATORIO: Siempre que encuentre neumáticos, presente una lista estructurada, clara y atractiva con la Clave, Nombre del modelo y Precio Neto.
-    - MANEJO DE STOCK: Si hay en catálogo pero no en stock físico (consultarExistencias arroja vacío), explique que "el inventario físico en sucursal está agotado temporalmente, pero el modelo se maneja sobre pedido o podemos ofrecerle las siguientes alternativas equivalentes".
-    - ACTUALIZACIÓN VISUAL: Al final de cada respuesta técnica, DEBE incluir el bloque JSON estricto: {"filters": {"ancho": "...", "serie": "...", "rin": "...", "marca": ["..."]}}. No incluya marcas que dejen la cuadrícula vacía.`,
+### PERFIL DE COMUNICACIÓN Y TONO:
+- **TONO**: Altamente profesional, formal (siempre trate de "Usted"), empático, proactivo y servicial.
+- **LENGUAJE**: Use terminología técnica correcta ("Neumático", "Banda de Rodamiento", "Índice de Carga", "Código de Velocidad", "Existencias", "Precio Neto"). Prohibido el lenguaje informal.
+
+### CAPACIDADES Y FUNCIONES TÉCNICAS (ENTRENAMIENTO EXPERTO):
+1. **BÚSQUEDA Y FILTRADO**: Use "buscarProductos". Si el usuario da información incompleta (ej. solo el Rin), pida amablemente el Ancho y la Serie.
+2. **DISPONIBILIDAD**: Use "consultarExistencias" con la clave. Indique siempre la sucursal y su dirección física.
+3. **DIAGNÓSTICO AVANZADO**: Antes de recomendar, pregunte: Tipo de vehículo (Sedán, SUV, Camioneta), condiciones de manejo (Ciudad, Carretera, Off-road) y clima.
+4. **CROSS-SELLING**: Recomiende profesionalmente el servicio de Alineación y Balanceo computarizado como medida de seguridad esencial para sus llantas nuevas.
+
+### REGLAS ESTRICTAS:
+- **NO VENTAS**: Prohibido solicitar anticipos, apartar productos o cerrar ventas financieras. Su función es asesoría técnica y búsqueda.
+- **NO POST-VENTA**: No gestione garantías ni reclamos. Redirija a sucursal física.
+
+### FORMATO DE LISTADO OBLIGATORIO:
+📊 **OPCIONES DISPONIBLES:**
+
+1. **CLAVE:** [Código]
+   **MODELO:** [Nombre completo]
+   **MEDIDA:** [Dimensiones]
+   **PRECIO NETO:** $[Precio] MXN
+   **PROMOCIÓN:** ⭐ [Nombre de Campaña o "Precio Regular"]
+   **UBICACIÓN:** [Sucursal y Dirección]
+   **CARACTERÍSTICA:** [Beneficio técnico clave]
+
+Al final de cada respuesta con productos, incluya el JSON de filtros técnico: {"filters": {...}}`,
   tools: tools
 });
 
@@ -626,13 +642,52 @@ app.post('/api/ai/chat', async (req, res) => {
       let functionResponseData = [];
 
       if (name === "buscarProductos") {
-        // Búsqueda flexible separando palabras por comodines %
-        const words = (args.query || '').split(' ').filter(w => w.length > 1);
-        const searchPattern = '%' + words.join('%') + '%';
+        const { query, soloPromos } = args;
+        const isPromoQuery = (query || '').toLowerCase().includes('promo');
+        const finalSoloPromos = soloPromos || isPromoQuery;
         
+        let whereClause = "WHERE (a.ALMNOM LIKE ? OR a.almcve LIKE ?)";
+        const params = [];
+        
+        if (finalSoloPromos) {
+          const cleanQuery = (query || '').replace(/promo[a-z]*/gi, '').trim();
+          if (!cleanQuery) {
+            whereClause = "WHERE 1=1";
+          } else {
+            const pattern = '%' + cleanQuery.split(' ').join('%') + '%';
+            params.push(pattern, `%${cleanQuery}%`);
+          }
+        } else {
+          const words = (query || '').split(' ').filter(w => w.length > 1);
+          const searchPattern = '%' + words.join('%') + '%';
+          params.push(searchPattern, `%${query}%`);
+        }
+
         const [rows] = await pool.query(
-          "SELECT a.ALMNOM as Descripcion, a.almcve as Clave, a.almstat as Status, a.almplist as Precio FROM almcat a WHERE a.ALMNOM LIKE ? OR a.almcve LIKE ? LIMIT 10",
-          [searchPattern, `%${args.query}%`]
+          `SELECT 
+            a.ALMNOM as Descripcion, 
+            a.almcve as Clave, 
+            a.almstat as Status, 
+            a.almplist as Precio,
+            MAX(CASE 
+              WHEN (g.grumar IN ('MI','BF','UN','AS') OR a.ALMNOM LIKE '%MICHELIN%' OR a.ALMNOM LIKE '%BFGOODRICH%' OR a.ALMNOM LIKE '%ADVANTAGE%') 
+                   AND (cp.CampanaDescripcion LIKE '%Michelin%' OR cp.CampanaDescripcion LIKE '%BFGoodrich%' OR cp.CampanaDescripcion LIKE '%Uniroyal%')
+              THEN cp.CampanaDescripcion
+              WHEN (g.grudesc LIKE '%BRIDGESTONE%' OR a.ALMNOM LIKE '%BRIDGESTONE%') AND cp.CampanaDescripcion LIKE '%Bridgestone%' THEN cp.CampanaDescripcion
+              ELSE cp.CampanaDescripcion 
+            END) as CampanaNombre
+          FROM almcat a 
+          LEFT JOIN almgru g ON a.grucve = g.grucve 
+          LEFT JOIN campana cp ON (
+            a.almrin BETWEEN cp.CampanaRinInicio AND cp.CampanaRinFin 
+            AND (cp.CampanaCateg = '' OR g.gruclas = cp.CampanaCateg)
+            AND CURDATE() BETWEEN cp.CampanaFechaInicio AND cp.CampanaFechaFin
+          )
+          ${whereClause}
+          GROUP BY a.almcve 
+          ${finalSoloPromos ? 'HAVING CampanaNombre IS NOT NULL' : ''}
+          LIMIT 12`,
+          params
         );
         functionResponseData = rows;
       } 
@@ -660,13 +715,19 @@ app.post('/api/ai/chat', async (req, res) => {
 
   } catch (error) {
     console.error('Error Crítico Bot:', error);
-    // Manejo de cuota de Google (Plan Free)
-    if (error.status === 429 || error.message.includes('429')) {
-      return res.status(200).json({ 
-        response: "⚠️ Estamos atendiendo demasiadas consultas por los minutos permitidos en el plan gratuito. Por favor, reintenta en unos instantes." 
-      });
+    
+    // Capturar error específico de cuota (429) o modelo no válido (404/400)
+    let errorMessage = "⚠️ Ocurrió un error inesperado en el servidor.";
+    
+    if (error.status === 429 || error.message.includes('429') || error.message.includes('quota')) {
+      errorMessage = "⚠️ Límite de consultas alcanzado (Plan Gratuito). Por favor, espere un minuto y reintente.";
+    } else if (error.message.includes('not found') || error.message.includes('404')) {
+      errorMessage = "⚠️ Error de Configuración: El modelo 'gemini-2.5-flash' no parece ser válido para esta API KEY. Pruebe con 'gemini-1.5-flash'.";
+    } else if (error.message) {
+      errorMessage = "⚠️ Error de la IA: " + error.message;
     }
-    res.status(500).json({ error: 'Error: ' + error.message });
+
+    res.status(200).json({ error: errorMessage });
   }
 });
 
