@@ -5,27 +5,38 @@ import michelinIcon from '../../assets/logo/michelin_icon.png';
 import michelinZoomIcon from '../../assets/logo/michelin_zoom.png';
 import nietoLogoN from '../../assets/logo/nieto_n.png';
 
+const formatMessage = (content, role = 'assistant') => {
+  if (!content) return null;
+  // Parse **bold** markdown-style text
+  const parts = content.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const textColor = role === 'user' ? 'text-[#ffce00]' : 'text-[#003d7a]';
+      return (
+        <strong key={index} className={`font-black ${textColor}`}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 const ChatBot = ({ onFilterUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Cargar historial persistente o inicializar
-  const [chatHistory, setChatHistory] = useState(() => {
-    const saved = localStorage.getItem('chatHistory');
-    return saved ? JSON.parse(saved) : [
-      { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO, Soy BIBENDUM NIETO,¿En qué puedo ayudarte el día de hoy?', timestamp: Date.now() }
-    ];
-  });
+  // Historial por sesión (se reinicia al entrar)
+  const [chatHistory, setChatHistory] = useState([
+    { role: 'assistant', content: 'Bienvenido a **MULTILLANTAS NIETO**. Soy **"Bibendum Nieto"**, ¿En qué puedo ayudarte el día de hoy?', timestamp: Date.now() }
+  ]);
 
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
   const chatWindowRef = useRef(null);
 
-  // Guardar historial en localStorage cada vez que cambie
-  useEffect(() => {
-    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-  }, [chatHistory]);
+
 
   // Forzar scroll al fondo al abrir el chat
   useEffect(() => {
@@ -231,7 +242,7 @@ const ChatBot = ({ onFilterUpdate }) => {
                       ? 'bg-[#003d7a] text-white rounded-[1.2rem] rounded-tr-none shadow-md shadow-blue-100'
                       : 'bg-slate-50 text-slate-700 rounded-[1.2rem] rounded-tl-none border border-slate-100'
                       }`}>
-                      <div className="whitespace-pre-wrap">{chat.content}</div>
+                      <div className="whitespace-pre-wrap">{formatMessage(chat.content, chat.role)}</div>
                     </div>
                   </div>
                 </React.Fragment>
