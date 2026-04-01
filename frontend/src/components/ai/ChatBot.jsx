@@ -9,12 +9,12 @@ const ChatBot = ({ onFilterUpdate }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
-  
+
   // Cargar historial persistente o inicializar
   const [chatHistory, setChatHistory] = useState(() => {
     const saved = localStorage.getItem('chatHistory');
     return saved ? JSON.parse(saved) : [
-      { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO ¿En qué puedo ayudarte el día hoy?', timestamp: Date.now() }
+      { role: 'assistant', content: 'BIENVENIDO A MULTILLANTAS NIETO, Soy BIBENDUM NIETO,¿En qué puedo ayudarte el día de hoy?', timestamp: Date.now() }
     ];
   });
 
@@ -42,16 +42,16 @@ const ChatBot = ({ onFilterUpdate }) => {
     const date = new Date(timestamp);
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
-    
+
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
     const isYesterday = date.toDateString() === yesterday.toDateString();
 
     if (isToday) return 'HOY';
     if (isYesterday) return 'AYER';
-    
-    return date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
+
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
       month: 'long',
       year: 'numeric'
     }).toUpperCase();
@@ -99,7 +99,7 @@ const ChatBot = ({ onFilterUpdate }) => {
     if (!message.trim() || isLoading) return;
     const userMsg = message.trim();
     setMessage('');
-    
+
     const timestamp = Date.now();
     setChatHistory(prev => [...prev, { role: 'user', content: userMsg, timestamp }]);
     setIsLoading(true);
@@ -108,13 +108,13 @@ const ChatBot = ({ onFilterUpdate }) => {
       const response = await fetch(`${API_BASE_URL}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMsg, 
-          history: chatHistory.length > 1 ? chatHistory.slice(1, 7).map(({role, content}) => ({role, content})) : [] 
+        body: JSON.stringify({
+          message: userMsg,
+          history: chatHistory.length > 1 ? chatHistory.slice(1, 7).map(({ role, content }) => ({ role, content })) : []
         })
       });
       const data = await response.json();
-      
+
       if (data.error) {
         setChatHistory(prev => [...prev, { role: 'assistant', content: data.error, timestamp: Date.now() }]);
         setIsLoading(false);
@@ -191,7 +191,7 @@ const ChatBot = ({ onFilterUpdate }) => {
               </div>
               <div className="flex flex-col">
                 <h3 className="text-[15px] font-black uppercase tracking-tight text-white leading-none italic">
-                  Asesor <span className="text-[#ffce00]">Nieto</span>
+                  BIBENDUM <span className="text-[#ffce00]">Nieto</span>
                 </h3>
                 <div className="flex items-center gap-1.5 mt-1">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-sm"></div>
@@ -209,7 +209,7 @@ const ChatBot = ({ onFilterUpdate }) => {
           <div className="flex-1 overflow-y-auto p-5 space-y-6 bg-white custom-scrollbar" ref={scrollRef}>
             {chatHistory.map((chat, i) => {
               const currentDivider = formatDateDivider(chat.timestamp);
-              const prevDivider = i > 0 ? formatDateDivider(chatHistory[i-1].timestamp) : null;
+              const prevDivider = i > 0 ? formatDateDivider(chatHistory[i - 1].timestamp) : null;
               const showDivider = currentDivider !== prevDivider;
 
               return (
